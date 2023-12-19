@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Final Fighters.sln"
+    "dotnet.defaultSolution": "final-fighters-2d.sln"
 }
