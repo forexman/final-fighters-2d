@@ -14,24 +14,16 @@ public class Ninja : UnitBase
         Dexterity = 22;
         Constitution = 12;
         Intelligence = 10;
-        Defense = 10;
-        MagicDefense = 10;
-        Power = 20;
-        Evasion = 18;
-        Accuracy = 20;
+        criticalChance = 100;
+        criticalDamageMultiplier = 25;
+        damageReduction = 0;
+        evasion = 20;
+        accuracy = 100;
+        damageBonus = 0;
     }
 
-    public override int BasicAttack()
+    public override int MainAttributeValue
     {
-        Debug.Log(Dexterity * 0.25);
-        BaseDamage = (int) (Dexterity * 0.25);
-                Debug.Log(BaseDamage);
-        return BaseDamage;
-    }
-
-    public override float SkillMultiplier()
-    {
-        BaseSkillMultiplier = 1 + (Dexterity / 16);
-        return BaseSkillMultiplier;
+        get { return Dexterity; }
     }
 }

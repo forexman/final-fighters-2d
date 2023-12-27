@@ -18,10 +18,19 @@ public class UnitDamageGUI : MonoBehaviour
         transform.position += new Vector3(0f, moveSpeed * Time.deltaTime, 0f);
     }
 
-    public void SetDamage(int damageAmount, SkillType skillType){
-        if (skillType == SkillType.Healing) damageText.text = "<color=#006400><b>" + damageAmount + "</b></color>";
-        else damageText.text = "<color=#880808><b>" + damageAmount + "</b></color>";
-        float jitter = Random.Range(-textVibration, + textVibration);
+    public void SetValueGUI(int damageAmount, ISkillEffect effect)
+    {
+        bool isHealingEffect = effect is HealingEffect;
+        if (isHealingEffect)
+        {
+            damageText.text = "<color=#006400><b>" + damageAmount + "</b></color>";
+        }
+        else
+        {
+            damageText.text = "<color=#880808><b>" + damageAmount + "</b></color>";
+        }
+
+        float jitter = Random.Range(-textVibration, +textVibration);
         transform.position += new Vector3(jitter, jitter, 0f);
     }
 

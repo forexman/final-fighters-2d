@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class UnitBase : MonoBehaviour
@@ -5,12 +7,19 @@ public class UnitBase : MonoBehaviour
     [SerializeField] private int unitID;
     [SerializeField] private string unitName;
     [SerializeField] private int currentHP, maxHP, currentMP, maxMP;
-    [SerializeField] private int strength, dexterity, constitution, intelligence, defense, magicDefense, power, evasion, accuracy;
+    [SerializeField] private int strength, dexterity, constitution, intelligence;
+    [SerializeField] public int criticalChance, criticalDamageMultiplier, damageReduction, damageBonus, evasion, accuracy;
     [SerializeField] private bool isDead;
+    [SerializeField] private bool isMarkedForElimination;
+
     [SerializeField] private bool isPlayerUnit;
     [SerializeField] private bool isPlaying;
-    private int baseDamage;
-    private float baseSkillMultiplier;
+    [SerializeField] private List<IStatusEffect> statusEffects = new List<IStatusEffect>();
+    [SerializeField] public bool IsStunned;
+    [SerializeField] public bool HasHaste;
+    [SerializeField] public int ActionsPerTurn = 1;
+    [SerializeField] public UnitStatusUI unitStatusUI;
+
 
     public int UnitID
     {
@@ -62,35 +71,20 @@ public class UnitBase : MonoBehaviour
         get { return intelligence; }
         protected set { intelligence = Mathf.Max(0, value); }
     }
-    public int Defense
+    public List<IStatusEffect> StatusEffects
     {
-        get { return defense; }
-        protected set { defense = Mathf.Max(0, value); }
-    }
-    public int MagicDefense
-    {
-        get { return magicDefense; }
-        protected set { magicDefense = Mathf.Max(0, value); }
-    }
-    public int Power
-    {
-        get { return power; }
-        protected set { power = Mathf.Max(0, value); }
-    }
-    public int Evasion
-    {
-        get { return evasion; }
-        protected set { evasion = Mathf.Max(0, value); }
-    }
-    public int Accuracy
-    {
-        get { return accuracy; }
-        protected set { accuracy = Mathf.Max(0, value); }
+        get { return statusEffects; }
+        set { statusEffects = value; }
     }
     public bool IsDead
     {
         get { return isDead; }
         set { isDead = value; }
+    }
+    public bool IsMarkedForElimination
+    {
+        get { return isMarkedForElimination; }
+        set { isMarkedForElimination = value; }
     }
     public bool IsPlayerUnit
     {
@@ -103,35 +97,27 @@ public class UnitBase : MonoBehaviour
         set { isPlaying = value; }
     }
 
-    public int BaseDamage
-    {
-        get { return baseDamage; }
-        protected set { baseDamage = Mathf.Max(0, value); }
-    }
-
-    public float BaseSkillMultiplier
-    {
-        get { return baseSkillMultiplier; }
-        protected set { baseSkillMultiplier = Mathf.Max(0, value); }
-    }
-
     public void Initialize(bool isPlayer)
     {
         IsPlayerUnit = isPlayer;
         UnitName = IsPlayerUnit ? UnitName : "Evil " + UnitName;
     }
 
-    public int TakeDamage(int dmg, DamageType dmgType)
+    public virtual int MainAttributeValue
     {
-        int totalDamage = dmg;
-        // Implement Defense at some point
-        CurrentHP -= totalDamage;
+        get { return 0; } // Default implementation, to be overridden
+    }
+
+    public int RollInitiative() => Random.Range(1, 21) + dexterity;
+
+    public void TakeDamage(int dmg, DamageType dmgType)
+    {
+        CurrentHP -= dmg;
         if (CurrentHP <= 0)
         {
             CurrentHP = 0;
-            isDead = true;
+            isMarkedForElimination = true;
         }
-        return totalDamage;
     }
 
     public void Heal(int amount)
@@ -141,23 +127,12 @@ public class UnitBase : MonoBehaviour
 
     public void ReduceMP(int amount)
     {
+        Debug.Log($"Reducing MP by {amount}");
         CurrentMP -= amount;
         if (CurrentMP <= 0)
         {
             CurrentMP = 0;
         }
-    }
-
-    public int RollInitiative() => Random.Range(1, 21) + dexterity;
-
-    public virtual int BasicAttack()
-    {
-        return baseDamage;
-    }
-
-    public virtual float SkillMultiplier()
-    {
-        return baseSkillMultiplier;
     }
 
     public bool IsUnitFriendly(UnitBase otherUnit)
@@ -168,6 +143,84 @@ public class UnitBase : MonoBehaviour
 
     public bool CanUseSkill(Skill skill)
     {
-        return currentMP >= skill.skillCost;
+        return currentMP >= skill.SkillCost;
+    }
+
+    public void ApplyHaste(int duration)
+    {
+        // Implement logic to handle Haste effect
+        // This might involve flagging the unit for an extra turn or adjusting turn order
+    }
+
+    public void ApplyStatusEffect(IStatusEffect effect)
+    {
+        if (effect == null)
+        {
+            Debug.LogError("Tried to apply a null status effect.");
+            return;
+        }
+        var existingEffect = statusEffects.FirstOrDefault(e => e.Type == effect.Type);
+        if (existingEffect != null)
+        {
+            existingEffect.Duration = effect.Duration; // Refresh duration
+        }
+        else
+        {
+            statusEffects.Add(effect);
+            effect.ApplyStatus(this);
+        }
+
+        unitStatusUI.UpdateStatusBar(this);
+    }
+
+    public void RemoveStatusEffect(IStatusEffect effect)
+    {
+        if (statusEffects.Contains(effect))
+        {
+            effect.RemoveStatus(this);
+            statusEffects.Remove(effect);
+        }
+    }
+
+    public void UpdateStatusEffects()
+    {
+        // Create a list to hold effects that need to be removed
+        var effectsToRemove = new List<IStatusEffect>();
+
+        foreach (var effect in statusEffects)
+        {
+            effect.UpdateStatus(this);
+            if (effect.Duration <= 0)
+            {
+                effectsToRemove.Add(effect);
+            }
+        }
+
+        // Remove expired effects
+        foreach (var expiredEffect in effectsToRemove)
+        {
+            RemoveStatusEffect(expiredEffect);
+        }
+
+        unitStatusUI.UpdateStatusBar(this);
+    }
+
+    public void ExpiredEffectsCheck()
+    {
+        List<IStatusEffect> effectsToRemove = new List<IStatusEffect>();
+
+        foreach (var effect in statusEffects)
+        {
+            // effect.UpdateStatus(this);
+            // if (effect.IsEffectExpired()) // Assuming each effect has a method to check if it's expired
+            // {
+            //     effectsToRemove.Add(effect);
+            // }
+        }
+
+        foreach (var expiredEffect in effectsToRemove)
+        {
+            RemoveStatusEffect(expiredEffect);
+        }
     }
 }

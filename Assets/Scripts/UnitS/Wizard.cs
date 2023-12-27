@@ -14,23 +14,16 @@ public class Wizard : UnitBase
         Dexterity = 14;
         Constitution = 10;
         Intelligence = 20;
-        Defense = 8;
-        MagicDefense = 15;
-        Power = 18;
-        Evasion = 12;
-        Accuracy = 15;
-        // isPlayerUnit = true; // Set based on unit type
+        criticalChance = 10;
+        criticalDamageMultiplier = 10;
+        damageReduction = 0;
+        evasion = 5;
+        accuracy = 100;
+        damageBonus = 0;
     }
 
-    public override int BasicAttack()
+    public override int MainAttributeValue
     {
-        BaseDamage = (int) (Intelligence * 0.25);
-        return BaseDamage;
-    }
-
-    public override float SkillMultiplier()
-    {
-        BaseSkillMultiplier = 1 + (Intelligence / 16);
-        return BaseSkillMultiplier;
+        get { return Intelligence; }
     }
 }

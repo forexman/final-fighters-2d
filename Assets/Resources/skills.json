@@ -1,0 +1,315 @@
+{
+    "skills": [
+        {
+            "Id": 0,
+            "Name": "Basic Attack",
+            "Description": "A basic weapon attack",
+            "Cost": 0,
+            "SkillTarget": 0,
+            "TargetCount": 1,
+            "Effects": [
+                {
+                    "Type": "Damage",
+                    "Power": 5,
+                    "DamageType": "Physical"
+                }
+            ],
+            "StatusEffects": [],
+            "UnitID": [
+                0,
+                1,
+                2,
+                3
+            ]
+        },
+        {
+            "Id": 1,
+            "Name": "Piercing Arrow",
+            "Description": "A high-damage single target attack",
+            "Cost": 20,
+            "SkillTarget": 0,
+            "TargetCount": 1,
+            "Effects": [
+                {
+                    "Type": "Damage",
+                    "Power": 25,
+                    "DamageType": "Physical"
+                }
+            ],
+            "StatusEffects": [],
+            "UnitID": [
+                1
+            ]
+        },
+        {
+            "Id": 2,
+            "Name": "Volley",
+            "Description": "Area damage to multiple targets",
+            "Cost": 30,
+            "SkillTarget": 0,
+            "TargetCount": 5,
+            "Effects": [
+                {
+                    "Type": "Damage",
+                    "Power": 20,
+                    "DamageType": "Physical"
+                }
+            ],
+            "StatusEffects": [],
+            "UnitID": [
+                1
+            ]
+        },
+        {
+            "Id": 3,
+            "Name": "Camouflage",
+            "Description": "Increases evasion for a few turns",
+            "Cost": 15,
+            "SkillTarget": 2,
+            "TargetCount": 1,
+            "Effects": [],
+            "StatusEffects": [
+                {
+                    "Type": "EvasionUp",
+                    "Power": 20,
+                    "Duration": 3
+                }
+            ],
+            "UnitID": [
+                1
+            ]
+        },
+        {
+            "Id": 4,
+            "Name": "Snipe",
+            "Description": "High damage shot with increased critical chance",
+            "Cost": 25,
+            "SkillTarget": 0,
+            "TargetCount": 1,
+            "Effects": [
+                {
+                    "Type": "Damage",
+                    "Power": 25,
+                    "DamageType": "Physical"
+                }
+            ],
+            "StatusEffects": [],
+            "CriticalChance": 0.3,
+            "UnitID": [
+                1
+            ]
+        },
+        {
+            "Id": 5,
+            "Name": "Shield Bash",
+            "Description": "Strikes an enemy with a shield, causing damage and stun",
+            "Cost": 25,
+            "SkillTarget": 0,
+            "TargetCount": 1,
+            "Effects": [
+                {
+                    "Type": "Damage",
+                    "Power": 15,
+                    "DamageType": "Physical"
+                }
+            ],
+            "StatusEffects": [
+                {
+                    "Type": "Stun",
+                    "Duration": 1
+                }
+            ],
+            "UnitID": [
+                0
+            ]
+        },
+        {
+            "Id": 6,
+            "Name": "Defensive Stance",
+            "Description": "Reduces incoming damage for several turns",
+            "Cost": 15,
+            "SkillTarget": 2,
+            "TargetCount": 1,
+            "Effects": [],
+            "StatusEffects": [
+                {
+                    "Type": "DefenseUp",
+                    "Power": 25,
+                    "Duration": 3
+                }
+            ],
+            "UnitID": [
+                0
+            ]
+        },
+        {
+            "Id": 7,
+            "Name": "Charge",
+            "Description": "Charges at an enemy, dealing damage",
+            "Cost": 20,
+            "SkillTarget": 0,
+            "TargetCount": 1,
+            "Effects": [
+                {
+                    "Type": "Damage",
+                    "Power": 20,
+                    "DamageType": "Physical"
+                }
+            ],
+            "StatusEffects": [],
+            "UnitID": [
+                0
+            ]
+        },
+        {
+            "Id": 8,
+            "Name": "Rally",
+            "Description": "Boosts the defense of all allies",
+            "Cost": 30,
+            "SkillTarget": 1,
+            "TargetCount": 5,
+            "Effects": [],
+            "StatusEffects": [
+                {
+                    "Type": "DefenseUp",
+                    "Power": 25,
+                    "Duration": 3
+                }
+            ],
+            "UnitID": [
+                0
+            ]
+        },
+        {
+            "Id": 9,
+            "Name": "Smoke Bomb",
+            "Description": "Throws a smoke bomb, decreasing enemies' accuracy",
+            "Cost": 15,
+            "SkillTarget": 0,
+            "TargetCount": 5,
+            "Effects": [],
+            "StatusEffects": [
+                {
+                    "Type": "AccuracyDown",
+                    "Power": 25,
+                    "Duration": 2
+                }
+            ],
+            "UnitID": [
+                2
+            ]
+        },
+        {
+            "Id": 10,
+            "Name": "Swift Strikes",
+            "Description": "Delivers multiple quick strikes to an enemy",
+            "Cost": 20,
+            "SkillTarget": 0,
+            "TargetCount": 1,
+            "Effects": [
+                {
+                    "Type": "Damage",
+                    "Power": 20,
+                    "DamageType": "Physical"
+                }
+            ],
+            "StatusEffects": [],
+            "UnitID": [
+                2
+            ]
+        },
+        {
+            "Id": 11,
+            "Name": "Poison Dart",
+            "Description": "A poisoned dart that causes damage over several turns",
+            "Cost": 5,
+            "SkillTarget": 0,
+            "TargetCount": 1,
+            "Effects": [],
+            "StatusEffects": [
+                {
+                    "Type": "Poison",
+                    "Power": 10,
+                    "Duration": 3
+                }
+            ],
+            "UnitID": [
+                2
+            ]
+        },
+        {
+            "Id": 12,
+            "Name": "Shadow Step",
+            "Description": "Increases evasion for 4 turns",
+            "Cost": 20,
+            "SkillTarget": 2,
+            "TargetCount": 1,
+            "Effects": [],
+            "StatusEffects": [
+                {
+                    "Type": "EvasionUp",
+                    "Power": 30,
+                    "Duration": 4
+                }
+            ],
+            "UnitID": [
+                2
+            ]
+        },
+        {
+            "Id": 13,
+            "Name": "Fireball",
+            "Description": "Conjures a fireball that damages all enemies",
+            "Cost": 30,
+            "SkillTarget": 0,
+            "TargetCount": 5,
+            "Effects": [
+                {
+                    "Type": "Damage",
+                    "Power": 20,
+                    "DamageType": "Magical"
+                }
+            ],
+            "StatusEffects": [],
+            "UnitID": [
+                3
+            ]
+        },
+        {
+            "Id": 14,
+            "Name": "Healing Light",
+            "Description": "Heals the wizard or an ally",
+            "Cost": 20,
+            "SkillTarget": 1,
+            "TargetCount": 1,
+            "Effects": [
+                {
+                    "Type": "Healing",
+                    "Power": 50
+                }
+            ],
+            "StatusEffects": [],
+            "UnitID": [
+                3
+            ]
+        },
+        {
+            "Id": 15,
+            "Name": "Mana Burst",
+            "Description": "A burst of energy that grants the target Haste",
+            "Cost": 25,
+            "SkillTarget": 1,
+            "TargetCount": 1,
+            "Effects": [],
+            "StatusEffects": [
+                {
+                    "Type": "Haste",
+                    "Duration": 1
+                }
+            ],
+            "UnitID": [
+                3
+            ]
+        }
+    ]
+}

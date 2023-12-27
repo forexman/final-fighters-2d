@@ -10,7 +10,6 @@ public class BattleMenuManager : MonoBehaviour
     [SerializeField] private GameObject unitStatsPanel, enemyUnitStatsPanel, initiativePanel;
     [SerializeField] private GameObject magicPanel, skillPanel, MPPanel, unitCurrentMP, skillMPCost;
     [SerializeField] private GameObject skillButtonPrefab;
-    [SerializeField] private CombatLogUI combatLog;
 
     // Dictionary to keep track of unit stats panels
     private Dictionary<UnitBase, GameObject> unitStatsPanels = new Dictionary<UnitBase, GameObject>();
@@ -23,7 +22,6 @@ public class BattleMenuManager : MonoBehaviour
     // Activates the unit panel UI elements
     public void EnableUnitPanel()
     {
-        BattleManager.instance.SelectedSkill = null;
         SetPanelActiveStates(action: true, magic: false, description: false, unitPanel: true, bottom: true, log: true, initiative: true);
     }
 
@@ -95,12 +93,6 @@ public class BattleMenuManager : MonoBehaviour
         }
     }
 
-    // Updates the combat log text
-    public void UpdateCombatLog(string message, bool add = true)
-    {
-        combatLog.UpdateText(message, add);
-    }
-
     // Sets the description text
     public void SetDescription(string message)
     {
@@ -121,8 +113,8 @@ public class BattleMenuManager : MonoBehaviour
 
         if (isButtonMouseOvered)
         {
-            skillMPCostText.text = skill.skillCost.ToString();
-            descriptionText.text = skill.skillDescription;
+            skillMPCostText.text = skill.SkillCost.ToString();
+            descriptionText.text = skill.SkillDescription;
         }
         else
         {

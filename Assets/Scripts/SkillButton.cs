@@ -20,7 +20,7 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     public void Initialize(Skill newSkill)
     {
         skill = newSkill;
-        skillNameText.text = newSkill.skillName;
+        skillNameText.text = newSkill.SkillName;
 
         // Configuring the button's click behavior
         button.onClick.RemoveAllListeners();
@@ -34,7 +34,7 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         if (BattleManager.instance.ActiveUnit.CanUseSkill(skill))
         {
-            BattleManager.instance.SelectedSkill = skill;
+            BattleManager.instance.SkillSelection(skill);
         }
     }
 

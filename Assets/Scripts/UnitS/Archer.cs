@@ -14,22 +14,16 @@ public class Archer : UnitBase
         Dexterity = 18;
         Constitution = 10;
         Intelligence = 12;
-        Defense = 12;
-        MagicDefense = 10;
-        Power = 16;
-        Evasion = 15;
-        Accuracy = 20;
+        criticalChance = 10;
+        criticalDamageMultiplier = 10;
+        damageReduction = 0;
+        evasion = 10;
+        accuracy = 100;
+        damageBonus = 0;
     }
 
-    public override int BasicAttack()
+    public override int MainAttributeValue
     {
-        BaseDamage = (int) (Dexterity * 0.25);
-        return BaseDamage;
-    }
-
-    public override float SkillMultiplier()
-    {
-        BaseSkillMultiplier = 1 + (Dexterity / 16);
-        return BaseSkillMultiplier;
+        get { return Dexterity; }
     }
 }

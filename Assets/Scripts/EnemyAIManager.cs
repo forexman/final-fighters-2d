@@ -1,33 +1,26 @@
+using System.Buffers.Text;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyAIManager : MonoBehaviour
 {
-    // Executes an action for a given unit based on selected skill and target
-    public static void ExecuteAction(UnitBase unit)
-    {
-        Skill chosenSkill = ChooseSkill(unit);
-        UnitBase targetUnit = ChooseTarget(unit, chosenSkill);
-
-        if (chosenSkill != null && targetUnit != null)
-        {
-            BattleManager.instance.ExecuteAction(chosenSkill, targetUnit);
-        }
-    }
-
     // Chooses a skill for the unit, prioritizing healing if necessary
-    private static Skill ChooseSkill(UnitBase unit)
+    public static Skill ChooseSkill(UnitBase unit)
     {
         List<Skill> availableSkills = BattleManager.instance.GetClassSpecificSkills(unit.UnitID);
-        Skill healingSkill = ChooseHealingSkillIfNecessary(unit, availableSkills);
+        Skill preferredSkill = null;
 
-        return healingSkill ?? ChooseAttackSkill(unit, availableSkills) ?? BattleManager.instance.BasicAttack;
+        // Example Logic: Prioritize healing if necessary, else choose an attack skill
+        preferredSkill = ChooseHealingSkillIfNecessary(unit, availableSkills)
+            ?? ChooseAttackSkill(unit, availableSkills);
+        Debug.Log($"AI Chose {preferredSkill.SkillName}");
+        return preferredSkill ?? SkillManager.Instance.SkillList[0];
     }
 
     // Chooses an attack skill from available skills
     private static Skill ChooseAttackSkill(UnitBase unit, List<Skill> availableSkills)
     {
-        availableSkills = availableSkills.FindAll(skill => skill.skillType == SkillType.Damage);
+        availableSkills = availableSkills.FindAll(skill => IsSkillDamage(skill));
         Shuffle(availableSkills);
 
         foreach (Skill skill in availableSkills)
@@ -44,13 +37,12 @@ public class EnemyAIManager : MonoBehaviour
     // Chooses a healing skill if there is an effective one available
     private static Skill ChooseHealingSkillIfNecessary(UnitBase unit, List<Skill> availableSkills)
     {
-        List<Skill> healingSkills = availableSkills.FindAll(skill => skill.skillType == SkillType.Healing);
+        List<Skill> healingSkills = availableSkills.FindAll(skill => IsSkillHealing(skill));
         Shuffle(healingSkills);
 
         foreach (Skill skill in healingSkills)
         {
-            int effectiveHealing = (int)(skill.skillPower * unit.SkillMultiplier());
-            if (unit.CanUseSkill(skill) && IsHealingEffective(unit, effectiveHealing))
+            if (unit.CanUseSkill(skill) && IsHealingEffective(unit, skill))
             {
                 return skill;
             }
@@ -59,27 +51,58 @@ public class EnemyAIManager : MonoBehaviour
         return null;
     }
 
-    // Checks if healing is effective for any teammate
-    private static bool IsHealingEffective(UnitBase unit, int healingAmount)
+    private static bool IsSkillHealing(Skill skill)
     {
-        return FindMostInjuredTeammate(unit, healingAmount) != null;
+        return skill.Effects.Exists(e => e is HealingEffect);
+    }
+
+    private static bool IsSkillDamage(Skill skill)
+    {
+        return skill.Effects.Exists(e => e is DamageEffect || e is DamageOverTimeEffect);
+    }
+
+    // Checks if healing is effective for any teammate
+    private static bool IsHealingEffective(UnitBase unit, Skill skill)
+    {
+        return FindMostInjuredTeammate(unit, skill) != null;
     }
 
     // Chooses a target based on the skill type
-    private static UnitBase ChooseTarget(UnitBase unit, Skill skill)
+    public static List<UnitBase> ChooseTargets(UnitBase unit, Skill skill)
     {
-        return skill.skillType == SkillType.Healing 
-            ? FindMostInjuredTeammate(unit, (int)(skill.skillPower * unit.SkillMultiplier()))
-            : GetRandomOpposingTeamUnit(unit);
+        List<UnitBase> targetUnits = new List<UnitBase>();
+        if (skill.TargetCount == 1)
+        {
+            UnitBase targetUnit = IsSkillHealing(skill) ? FindMostInjuredTeammate(unit, skill) : GetRandomOpposingTeamUnit(unit);
+            targetUnits.Add(targetUnit);
+        }
+        else
+        {
+            if (Skill.SkillTargetHostile(skill))
+            {
+                targetUnits = BattleManager.instance.ActiveUnits.FindAll(member => !unit.IsUnitFriendly(member));
+            }
+            else if (Skill.SkillTargetFriendly(skill))
+            {
+                targetUnits = BattleManager.instance.ActiveUnits.FindAll(member => unit.IsUnitFriendly(member));
+            }
+            else
+            {
+                Debug.Log("Skill Target Selection Error");
+            }
+        }
+
+        return targetUnits;
     }
 
     // Finds the most injured teammate for healing
-    private static UnitBase FindMostInjuredTeammate(UnitBase unit, int healingAmount)
+    private static UnitBase FindMostInjuredTeammate(UnitBase unit, Skill skill)
     {
-        List<UnitBase> teamMembers = BattleManager.instance.ActiveUnits.FindAll(member => 
+        int healingAmount = (int)(skill.SkillPower);
+        List<UnitBase> teamMembers = BattleManager.instance.ActiveUnits.FindAll(member =>
             unit.IsUnitFriendly(member) && healingAmount <= member.MaxHP - member.CurrentHP);
 
-        if (teamMembers.Count == 0) 
+        if (teamMembers.Count == 0)
             return null;
 
         teamMembers.Sort((a, b) => (a.CurrentHP / a.MaxHP).CompareTo(b.CurrentHP / b.MaxHP));

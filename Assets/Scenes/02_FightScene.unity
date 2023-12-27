@@ -524,6 +524,7 @@ GameObject:
   m_Component:
   - component: {fileID: 284468869}
   - component: {fileID: 284468868}
+  - component: {fileID: 284468870}
   m_Layer: 0
   m_Name: BattleManager
   m_TagString: Untagged
@@ -546,7 +547,6 @@ MonoBehaviour:
   isBattleActive: 0
   activeUnits: []
   activeUnit: {fileID: 0}
-  combatLog: []
   battleScene: {fileID: 0}
   playerPositions:
   - {fileID: 1361455833}
@@ -570,9 +570,10 @@ MonoBehaviour:
   - {fileID: 7629990475757240076, guid: 0f83a8775e4faba47b360debb3eebd67, type: 3}
   currentTurn: 0
   battleMenuManager: {fileID: 1958684378}
+  combatLogManager: {fileID: 1796237447}
   dmgText: {fileID: 6832428476641338111, guid: 246564e516919b44d88e13b94255d02c, type: 3}
-  skillDatabase: {fileID: 11400000, guid: 1f4bde381bb5ef943bd8102f39404170, type: 2}
-  basicAttack: {fileID: 11400000, guid: 26f11c3a5229974438b620eedf0f0a2f, type: 2}
+  targetUnits: []
+  actionsTakenThisTurn: 0
 --- !u!4 &284468869
 Transform:
   m_ObjectHideFlags: 0
@@ -588,6 +589,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &284468870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 284468867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b67c85634a65c04c83de8ca0ba842e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skillMetadataList: []
 --- !u!1 &383104422
 GameObject:
   m_ObjectHideFlags: 0
@@ -1426,6 +1440,17 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1796237447 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7938112679871077177, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+  m_PrefabInstance: {fileID: 2390367215348302096}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 982c8ce388df7954cb61e37e9a841b75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1829294876
 GameObject:
   m_ObjectHideFlags: 0
@@ -1911,11 +1936,69 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2084125391502363717, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2084125391502363717, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2084125391502363717, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2084125391502363717, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2084125391502363717, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 1102.5184
+      objectReference: {fileID: 0}
+    - target: {fileID: 2084125391502363717, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4924158325854138276, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4924158325854138276, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4924158325854138276, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4924158325854138276, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4924158325854138276, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4924158325854138276, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5104185118636224718, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7060416163311773659, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
       propertyPath: m_Name
       value: BattleMenu
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 7833166581574410389, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+      propertyPath: m_Name
+      value: CombatLog
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 455273014354653154, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
+    - {fileID: 7060269437162013354, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

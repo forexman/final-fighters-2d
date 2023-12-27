@@ -14,22 +14,16 @@ public class Knight : UnitBase
         Dexterity = 10;
         Constitution = 18;
         Intelligence = 8;
-        Defense = 15;
-        MagicDefense = 10;
-        Power = 10;
-        Evasion = 10;
-        Accuracy = 12;
+        criticalChance = 10;
+        criticalDamageMultiplier = 10;
+        damageReduction = 20;
+        evasion = 0;
+        accuracy = 100;
+        damageBonus = 0;
     }
 
-    public override int BasicAttack()
+    public override int MainAttributeValue
     {
-        BaseDamage = (int) (Strength * 0.25);
-        return BaseDamage;
-    }
-
-    public override float SkillMultiplier()
-    {
-        BaseSkillMultiplier = 1 + (Strength / 16);
-        return BaseSkillMultiplier;
+        get { return Strength; }
     }
 }
