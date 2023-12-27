@@ -127,7 +127,6 @@ public class UnitBase : MonoBehaviour
 
     public void ReduceMP(int amount)
     {
-        Debug.Log($"Reducing MP by {amount}");
         CurrentMP -= amount;
         if (CurrentMP <= 0)
         {
@@ -162,7 +161,7 @@ public class UnitBase : MonoBehaviour
         var existingEffect = statusEffects.FirstOrDefault(e => e.Type == effect.Type);
         if (existingEffect != null)
         {
-            existingEffect.Duration = effect.Duration; // Refresh duration
+            existingEffect.Duration = effect.Duration;
         }
         else
         {

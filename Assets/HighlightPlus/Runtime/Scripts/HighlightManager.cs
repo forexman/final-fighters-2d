@@ -239,11 +239,11 @@ namespace HighlightPlus
                 // Toggles selection
                 if (InputProxy.GetMouseButtonDown(0))
                 {
-                    if (BattleManager.instance)
+                    if (ServiceLocator.Instance.GetService<IBattleManager>()!=null)
                     {
-                        if (BattleManager.instance.ActiveUnit.IsPlayerUnit)
+                        if (ServiceLocator.Instance.GetService<IBattleManager>().ActiveUnit.IsPlayerUnit)
                         {
-                            BattleManager.instance.PlayerSelectTargetUnit(currentObject.transform.GetComponent<UnitBase>());
+                            ServiceLocator.Instance.GetService<IBattleManager>().PlayerSelectTargetUnit(currentObject.transform.GetComponent<UnitBase>());
                         }
 
                     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,11 +36,6 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-
-    }
-
     private void LoadSkillsFromJSON()
     {
         TextAsset skillData = Resources.Load<TextAsset>("skills");
@@ -53,6 +49,19 @@ public class SkillManager : MonoBehaviour
         {
             skillList.Add(SkillFactory.CreateSkill(metadata));
         }
+    }
+
+    public List<Skill> GetClassSpecificSkills(int classID)
+    {
+        List<Skill> classSkills = new List<Skill>();
+        foreach (Skill skill in SkillManager.Instance.SkillList)
+        {
+            if (Array.Exists(skill.UnitID, id => id == classID) && skill.Id != 0)
+            {
+                classSkills.Add(skill);
+            }
+        }
+        return classSkills;
     }
 }
 

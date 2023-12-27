@@ -8,4 +8,5 @@ public interface IStatusEffect
     void ApplyStatus(UnitBase unit);
     void RemoveStatus(UnitBase unit);
     void UpdateStatus(UnitBase unit);
+    void SetDependencies(IBattleManager battleManager);
 }

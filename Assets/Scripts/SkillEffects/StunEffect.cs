@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class StunEffect : ISkillEffect
 {
-    private int duration; // Number of turns the stun lasts
+    private int duration;
 
     public StunEffect(int duration)
     {

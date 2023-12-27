@@ -12,6 +12,14 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     [SerializeField] private TextMeshProUGUI skillNameText;
 
     private Skill skill;
+    private IBattleManager battleManager;
+    private IBattleMenu battleMenu;
+
+    public void SetDependencies(IBattleManager battleManager, IBattleMenu battleMenu)
+    {
+        this.battleManager = battleManager;
+        this.battleMenu = battleMenu;        
+    }
 
     /// <summary>
     /// Initializes the skill button with a given skill.
@@ -32,9 +40,9 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     /// </summary>
     private void SelectSkillIfPossible()
     {
-        if (BattleManager.instance.ActiveUnit.CanUseSkill(skill))
+        if (battleManager.ActiveUnit.CanUseSkill(skill))
         {
-            BattleManager.instance.SkillSelection(skill);
+            battleManager.SkillSelection(skill);
         }
     }
 
@@ -44,7 +52,7 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     /// <param name="eventData">Event data for the pointer event.</param>
     public void OnPointerEnter(PointerEventData eventData)
     {
-        BattleManager.instance.BattleMenuManager.MouseOverSkill(skill, true);
+        battleMenu.MouseOverSkill(skill, true);
     }
 
     /// <summary>
@@ -53,6 +61,6 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     /// <param name="eventData">Event data for the pointer event.</param>
     public void OnPointerExit(PointerEventData eventData)
     {
-        BattleManager.instance.BattleMenuManager.MouseOverSkill(skill, false);
+        battleMenu.MouseOverSkill(skill, false);
     }
 }

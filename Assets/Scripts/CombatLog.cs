@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class CombatLog : MonoBehaviour
+public class CombatLog : MonoBehaviour, ICombatLogger
 {
     [SerializeField] private List<string> combatLogFile;
     [SerializeField] TMP_Text combatLogText;
 
-    public void AddEventToCombatLog(string msg, bool add = true)
+    public void AddEventToCombatLog(string msg, bool additive = true)
     {
         combatLogFile.Add(msg);
-        UpdateText(msg, add);
+        UpdateText(msg, additive);
     }
 
-    public void UpdateText(string message, bool add)
+    private void UpdateText(string message, bool additive)
     {
-        if(add) combatLogText.text += "\n" + message;
+        if(additive) combatLogText.text += "\n" + message;
         else combatLogText.text = message;
     }
 

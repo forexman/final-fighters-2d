@@ -17,7 +17,6 @@ public class BuffEffect : ISkillEffect
 
     public void ApplyEffect(UnitBase source, IEnumerable<UnitBase> targets, Skill skill)
     {
-        Debug.Log("called");
         foreach (var target in targets)
         {
             target.ApplyStatusEffect(new BuffStatus(buffType, amount, duration));

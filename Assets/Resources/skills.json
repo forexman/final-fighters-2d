@@ -285,7 +285,7 @@
             "Effects": [
                 {
                     "Type": "Healing",
-                    "Power": 50
+                    "Power": 20
                 }
             ],
             "StatusEffects": [],

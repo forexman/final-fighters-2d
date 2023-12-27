@@ -4,7 +4,13 @@ public class DebuffStatus : IStatusEffect
     private string debuffType;
     private int amount;
     public int Duration { get; set; }
+    private IBattleManager battleManager;
 
+    public void SetDependencies(IBattleManager battleManager)
+    {
+        this.battleManager = battleManager;
+    }
+    
     public DebuffStatus(string debuffType, int amount, int duration)
     {
         this.debuffType = debuffType;
@@ -21,13 +27,15 @@ public class DebuffStatus : IStatusEffect
         {
             case "EvasionDown":
                 unit.evasion -= amount;
-                BattleManager.instance.combatLogManager.AddEventToCombatLog($"{unit.UnitName}'s Evasion went down.");
+                battleManager.AddEventToCombatLog($"{unit.UnitName}'s Evasion went down.");
                 break;
             case "AccuracyDown":
                 unit.accuracy -= amount;
+                battleManager.AddEventToCombatLog($"{unit.UnitName}'s Accuracy went down.");
                 break;
             case "DefenseDown":
                 unit.damageReduction -= amount;
+                battleManager.AddEventToCombatLog($"{unit.UnitName}'s Defense went down.");
                 break;
                 // Add more cases as needed
         }
@@ -41,10 +49,15 @@ public class DebuffStatus : IStatusEffect
         {
             case "EvasionDown":
                 unit.evasion += amount;
-                BattleManager.instance.combatLogManager.AddEventToCombatLog($"{unit.UnitName}'s Evasion is back to normal.");
+                battleManager.AddEventToCombatLog($"{unit.UnitName}'s Evasion is back to normal.");
                 break;
             case "AccuracyDown":
                 unit.accuracy += amount;
+                battleManager.AddEventToCombatLog($"{unit.UnitName}'s Accuracy is back to normal.");
+                break;
+            case "DefenseDown":
+                unit.damageReduction += amount;
+                battleManager.AddEventToCombatLog($"{unit.UnitName}'s Defense is back to normal.");
                 break;
                 // Add more cases as needed
         }

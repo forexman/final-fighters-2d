@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,12 +33,13 @@ public class DamageEffect : ISkillEffect
         if (IsCriticalHit(attacker, skill))
         {
             finalDamage += (int)(finalDamage * (attacker.criticalDamageMultiplier + skill.CriticalDamageMultiplier) / 100);
-            BattleManager.instance.combatLogManager.AddEventToCombatLog($"CRITICAL HIT! {attacker.UnitName} uses {skill.SkillName} and deals {Mathf.Max(0, finalDamage)} {damageType} damage to {defender.UnitName}.");
+            ServiceLocator.Instance.GetService<ICombatLogger>().AddEventToCombatLog($"CRITICAL HIT! {attacker.UnitName} uses {skill.SkillName} and deals {Mathf.Max(0, finalDamage)} {damageType} damage to {defender.UnitName}.");
         }
         else
         {
-            BattleManager.instance.combatLogManager.AddEventToCombatLog($"{attacker.UnitName} uses {skill.SkillName} and deals {Mathf.Max(0, finalDamage)} {damageType} damage to {defender.UnitName}.");
+            ServiceLocator.Instance.GetService<ICombatLogger>().AddEventToCombatLog($"{attacker.UnitName} uses {skill.SkillName} and deals {Mathf.Max(0, finalDamage)} {damageType} damage to {defender.UnitName}.");
         }
+
         return Mathf.Max(0, finalDamage);
     }
 

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class BattleMenuManager : MonoBehaviour
+public class BattleMenu : MonoBehaviour, IBattleMenu
 {
     // Serialized fields for UI elements
     [SerializeField] private GameObject bottomPanel, combatLogPanel, actionPanel, descriptionPanel;
@@ -13,6 +13,13 @@ public class BattleMenuManager : MonoBehaviour
 
     // Dictionary to keep track of unit stats panels
     private Dictionary<UnitBase, GameObject> unitStatsPanels = new Dictionary<UnitBase, GameObject>();
+
+    private IBattleManager battleManager;
+
+    public void Initialize(IBattleManager battleManager)
+    {
+        this.battleManager = battleManager;
+    }
 
     private void Start()
     {
@@ -88,8 +95,10 @@ public class BattleMenuManager : MonoBehaviour
 
         foreach (Skill skill in classSkills)
         {
-            GameObject skillButton = Instantiate(skillButtonPrefab, skillPanel.transform);
-            skillButton.GetComponent<SkillButton>().Initialize(skill);
+            GameObject skillButtonObj = Instantiate(skillButtonPrefab, skillPanel.transform);
+            SkillButton skillButton = skillButtonObj.GetComponent<SkillButton>();
+            skillButton.Initialize(skill);
+            skillButton.SetDependencies(battleManager, this);
         }
     }
 
@@ -102,7 +111,7 @@ public class BattleMenuManager : MonoBehaviour
     // Initiates a basic attack
     public void BasicAttack()
     {
-        BattleManager.instance.PlayerBasicAttack();
+        battleManager.PlayerBasicAttack();
     }
 
     // Updates skill description and MP cost display based on mouse hover
@@ -124,7 +133,7 @@ public class BattleMenuManager : MonoBehaviour
     }
 
     // Sets the initiative panel with the names of active units
-    internal void SetInitiativePanel(List<UnitBase> activeUnits)
+    public void SetInitiativePanel(List<UnitBase> activeUnits)
     {
         TextMeshProUGUI initiativeText = initiativePanel.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
         initiativeText.text = FormatInitiativeText(activeUnits);
@@ -145,7 +154,7 @@ public class BattleMenuManager : MonoBehaviour
     // Updates the MP display
     private void UpdateMPDisplay()
     {
-        UnitBase activeUnit = BattleManager.instance.ActiveUnit;
+        UnitBase activeUnit = battleManager.ActiveUnit;
         unitCurrentMP.GetComponent<TextMeshProUGUI>().text = $"{activeUnit.CurrentMP}/{activeUnit.MaxMP}";
     }
 

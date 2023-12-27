@@ -3,6 +3,12 @@ public class StunStatus : IStatusEffect
 
     public string Type => "Stun";
     public int Duration { get; set; }
+    private IBattleManager battleManager;
+
+    public void SetDependencies(IBattleManager battleManager)
+    {
+        this.battleManager = battleManager;
+    }
 
     public StunStatus(int duration)
     {
@@ -13,7 +19,7 @@ public class StunStatus : IStatusEffect
     {
         // Apply stun logic
         unit.IsStunned = true;
-        BattleManager.instance.combatLogManager.AddEventToCombatLog($"{unit.UnitName} is Stunned!");
+        battleManager.AddEventToCombatLog($"{unit.UnitName} is Stunned!");
     }
 
     public void RemoveStatus(UnitBase unit)

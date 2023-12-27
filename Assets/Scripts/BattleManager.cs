@@ -3,40 +3,30 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BattleManager : MonoBehaviour
+public class BattleManager : MonoBehaviour, IBattleManager
 {
-    public static BattleManager instance;
-
     // Serialized fields for customization in Unity Editor
     [SerializeField] private bool isBattleActive;
     [SerializeField] private List<UnitBase> activeUnits;
     [SerializeField] private UnitBase activeUnit;
-    [SerializeField] private GameObject battleScene;
     [SerializeField] private Transform[] playerPositions;
     [SerializeField] private Transform[] enemyPositions;
     [SerializeField] private GameObject[] playerPrefabs, enemyPrefabs;
     [SerializeField] private int currentTurn;
-    [SerializeField] private BattleMenuManager battleMenuManager;
-    [SerializeField] public CombatLog combatLogManager;
-
     [SerializeField] private UnitDamageGUI dmgText;
-
-    // Properties for internal use
     [SerializeField] private Skill selectedSkill;
     [SerializeField] private List<UnitBase> targetUnits;
     [SerializeField] private int actionsTakenThisTurn;
+    private CombatLog combatLog;
+    private IBattleMenu battleMenu;
+    private IAIManager aiManager;
 
     // Getters and setters
-    public UnitBase ActiveUnit => activeUnit;
+    public UnitBase ActiveUnit => activeUnit; //read-only, turn orders are only handled here
     public Skill SelectedSkill
     {
         get => selectedSkill;
         set => selectedSkill = value;
-    }
-    public BattleMenuManager BattleMenuManager
-    {
-        get => battleMenuManager;
-        set => battleMenuManager = value;
     }
     public List<UnitBase> ActiveUnits
     {
@@ -44,18 +34,12 @@ public class BattleManager : MonoBehaviour
         protected set => activeUnits = value;
     }
 
-    // Singleton pattern to ensure only one instance of BattleManager exists
-    private void Awake()
+
+    public void Initialize(IBattleMenu battleMenu, CombatLog combatLog, IAIManager aiManager)
     {
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        this.battleMenu = battleMenu;
+        this.combatLog = combatLog;
+        this.aiManager = aiManager;
     }
 
     private void Start()
@@ -73,7 +57,7 @@ public class BattleManager : MonoBehaviour
 
         activeUnits.Sort((unitA, unitB) => unitB.RollInitiative().CompareTo(unitA.RollInitiative()));
         currentTurn = -1;
-        combatLogManager.AddEventToCombatLog("Combat Starts!", false);
+        combatLog.AddEventToCombatLog("Combat Starts!", false);
         NextTurn();
     }
 
@@ -86,7 +70,7 @@ public class BattleManager : MonoBehaviour
             playerUnit.Initialize(true);
             activeUnits.Add(playerUnit);
             SetupUnitSpriteRenderer(playerInstance);
-            battleMenuManager.AddUnitStatsPanel(playerUnit);
+            battleMenu.AddUnitStatsPanel(playerUnit);
         }
     }
 
@@ -107,7 +91,7 @@ public class BattleManager : MonoBehaviour
             UnitBase enemyUnit = enemyInstance.GetComponent<UnitBase>();
             enemyUnit.Initialize(false);
             activeUnits.Add(enemyUnit);
-            battleMenuManager.AddUnitStatsPanel(enemyUnit);
+            battleMenu.AddUnitStatsPanel(enemyUnit);
         }
     }
 
@@ -118,7 +102,7 @@ public class BattleManager : MonoBehaviour
         activeUnit = null;
         targetUnits = new List<UnitBase>();
         selectedSkill = null;
-        BattleMenuManager.DisableCombatUI();
+        battleMenu.DisableCombatUI();
         // Cleanup and reset logic for the end of the battle
     }
 
@@ -137,7 +121,7 @@ public class BattleManager : MonoBehaviour
             activeUnit.IsPlaying = false;
             // Update status effects for the unit that just completed its turn
             activeUnit.UpdateStatusEffects();
-            battleMenuManager.UpdateUnitStatsPanelText(activeUnit);
+            battleMenu.UpdateUnitStatsPanelText(activeUnit);
         }
     }
 
@@ -147,7 +131,7 @@ public class BattleManager : MonoBehaviour
         {
             if (activeUnits[i].IsMarkedForElimination)
             {
-                combatLogManager.AddEventToCombatLog(activeUnits[i].UnitName + " is unconscious!");
+                combatLog.AddEventToCombatLog(activeUnits[i].UnitName + " is unconscious!");
                 activeUnits.RemoveAt(i);
             }
         }
@@ -164,25 +148,25 @@ public class BattleManager : MonoBehaviour
         currentTurn = (currentTurn + 1) % activeUnits.Count;
         activeUnit = activeUnits[currentTurn];
         activeUnit.IsPlaying = true;
-        combatLogManager.AddEventToCombatLog($"It is {activeUnit.UnitName}'s turn.");
-        battleMenuManager.SetInitiativePanel(activeUnits);
+        combatLog.AddEventToCombatLog($"It is {activeUnit.UnitName}'s turn.");
+        battleMenu.SetInitiativePanel(activeUnits);
 
         if (activeUnit.IsStunned)
         {
-            combatLogManager.AddEventToCombatLog($"{activeUnit.UnitName} is stunned and loses its turn.");
+            combatLog.AddEventToCombatLog($"{activeUnit.UnitName} is stunned and loses its turn.");
             NextTurn();
         }
         else
         {
             if (activeUnit.IsPlayerUnit)
             {
-                battleMenuManager.PlayerTurn();
-                battleMenuManager.PopulateMagicPanel(GetClassSpecificSkills(activeUnit.UnitID));
+                battleMenu.PlayerTurn();
+                battleMenu.PopulateMagicPanel(SkillManager.Instance.GetClassSpecificSkills(activeUnit.UnitID));
                 StartCoroutine(PlayerMoveCoroutine());
             }
             else
             {
-                battleMenuManager.EnemyTurn();
+                battleMenu.EnemyTurn();
                 StartCoroutine(EnemyAIMoveCoroutine());
             }
         }
@@ -191,8 +175,8 @@ public class BattleManager : MonoBehaviour
 
     private IEnumerator EnemyAIMoveCoroutine()
     {
-        SkillSelection(EnemyAIManager.ChooseSkill(activeUnit));
-        if (targetUnits.Count == 0) targetUnits = EnemyAIManager.ChooseTargets(activeUnit, selectedSkill);
+        SkillSelection(aiManager.AIChooseSkill(activeUnit));
+        if (targetUnits.Count == 0) targetUnits = aiManager.AIChooseTargets(activeUnit, selectedSkill);
         ExecuteAction(selectedSkill, targetUnits);
         yield return new WaitForSeconds(0.3f);
     }
@@ -207,18 +191,7 @@ public class BattleManager : MonoBehaviour
         yield return new WaitForSeconds(.3f);
     }
 
-    public List<Skill> GetClassSpecificSkills(int classID)
-    {
-        List<Skill> classSkills = new List<Skill>();
-        foreach (Skill skill in SkillManager.Instance.SkillList)
-        {
-            if (Array.Exists(skill.UnitID, id => id == classID) && skill.Id != 0)
-            {
-                classSkills.Add(skill);
-            }
-        }
-        return classSkills;
-    }
+
 
     public void PlayerBasicAttack()
     {
@@ -229,13 +202,8 @@ public class BattleManager : MonoBehaviour
     {
         if (selectedSkill != null && activeUnits.Contains(unit))
         {
-            Debug.Log("Checking");
-            Debug.Log(selectedSkill.SkillName);
-            Debug.Log(selectedSkill.SkillTarget);
-
             if (Skill.SkillTargetHostile(selectedSkill))
             {
-                Debug.Log("Is Attack");
                 if (!activeUnit.IsUnitFriendly(unit))
                 {
                     targetUnits.Add(unit);
@@ -243,7 +211,6 @@ public class BattleManager : MonoBehaviour
             }
             else if (Skill.SkillTargetFriendly(selectedSkill))
             {
-                Debug.Log("Is Healing");
                 if (activeUnit.IsUnitFriendly(unit))
                 {
                     targetUnits.Add(unit);
@@ -259,23 +226,20 @@ public class BattleManager : MonoBehaviour
     public void SkillSelection(Skill skill)
     {
         selectedSkill = skill;
-        Debug.Log($"Skill's targets {skill.TargetCount}");
         if (selectedSkill != null)
         {
-            if (selectedSkill.SkillTarget == SkillTargetType.Self) targetUnits.Add(activeUnit);
+            if (Skill.SkillTargetSelf(selectedSkill)) targetUnits.Add(activeUnit);
             if (selectedSkill.TargetCount > 1)
             {
                 if (Skill.SkillTargetHostile(selectedSkill))
                 {
-                    Debug.Log("Is Attack");
                     targetUnits = activeUnits.FindAll(member => !activeUnit.IsUnitFriendly(member));
                 }
                 else if (Skill.SkillTargetFriendly(selectedSkill))
                 {
-                    Debug.Log("Is Healing");
                     targetUnits = activeUnits.FindAll(member => activeUnit.IsUnitFriendly(member));
                 }
-                else
+                else 
                 {
                     Debug.Log("Skill Target Selection Error");
                 }
@@ -296,7 +260,7 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
-            combatLogManager.AddEventToCombatLog(activeUnit.UnitName + " is hastened, and acts again!");
+            combatLog.AddEventToCombatLog(activeUnit.UnitName + " is hastened, and acts again!");
             selectedSkill = null;
             targetUnits = new List<UnitBase>();
             // Continue with the current unit's turn
@@ -318,11 +282,11 @@ public class BattleManager : MonoBehaviour
             if (CheckSkillHit(sourceUnit, skill, target))
             {
                 // Apply all the skill's effects and status effects to the target
-                skill.Activate(sourceUnit, new List<UnitBase> { target }, skill);
+                skill.Activate(sourceUnit, new List<UnitBase> { target }, skill, this);
             }
             else
             {
-                combatLogManager.AddEventToCombatLog($"{sourceUnit.UnitName} uses {skill.SkillName} and misses {target.UnitName}!");
+                combatLog.AddEventToCombatLog($"{sourceUnit.UnitName} uses {skill.SkillName} and misses {target.UnitName}!");
             }
         }
 
@@ -332,6 +296,11 @@ public class BattleManager : MonoBehaviour
 
         // Display effects on the target unit (if applicable)
         // DisplaySkillEffect(target, skill);
+    }
+
+    public void AddEventToCombatLog(string message)
+    {
+        combatLog.AddEventToCombatLog(message);
     }
 
     private bool CheckSkillHit(UnitBase sourceUnit, Skill skill, UnitBase target)
@@ -346,10 +315,10 @@ public class BattleManager : MonoBehaviour
     private void UpdateBattleUI()
     {
         // Update UI elements related to the active and target units
-        battleMenuManager.UpdateUnitStatsPanelText(activeUnit);
+        battleMenu.UpdateUnitStatsPanelText(activeUnit);
         foreach (var target in targetUnits)
         {
-            battleMenuManager.UpdateUnitStatsPanelText(target);
+            battleMenu.UpdateUnitStatsPanelText(target);
         }
     }
 

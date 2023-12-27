@@ -6,7 +6,13 @@ public class HasteStatus : IStatusEffect
 {
     public string Type => "Haste";
     public int Duration { get; set; }
+    private IBattleManager battleManager;
 
+    public void SetDependencies(IBattleManager battleManager)
+    {
+        this.battleManager = battleManager;
+    }
+    
     public HasteStatus(int duration)
     {
         Duration = duration;
@@ -14,15 +20,14 @@ public class HasteStatus : IStatusEffect
 
     public void ApplyStatus(UnitBase unit)
     {
-        BattleManager.instance.combatLogManager.AddEventToCombatLog($"{unit.UnitName} is Hastened!");
+        battleManager.AddEventToCombatLog($"{unit.UnitName} is Hastened!");
         unit.HasHaste = true;
         unit.ActionsPerTurn++;
     }
 
     public void RemoveStatus(UnitBase unit)
     {
-        Debug.Log("Removing Haste");
-        BattleManager.instance.combatLogManager.AddEventToCombatLog($"{unit.UnitName} is no longer under the effects of Haste.");
+        battleManager.AddEventToCombatLog($"{unit.UnitName} is no longer under the effects of Haste.");
         unit.HasHaste = false;
         unit.ActionsPerTurn--;
     }

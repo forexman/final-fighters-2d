@@ -8,6 +8,12 @@ public class BuffStatus : IStatusEffect
     private int amount;
     public int Duration { get; set; }
     public string Type => buffType;
+    private IBattleManager battleManager;
+
+    public void SetDependencies(IBattleManager battleManager)
+    {
+        this.battleManager = battleManager;
+    }
 
     public BuffStatus(string buffType, int amount, int duration)
     {
@@ -22,15 +28,15 @@ public class BuffStatus : IStatusEffect
         {
             case "EvasionUp":
                 unit.evasion += amount;
-                BattleManager.instance.combatLogManager.AddEventToCombatLog($"{unit.UnitName}'s Evasion went up!");
+                battleManager.AddEventToCombatLog($"{unit.UnitName}'s Evasion went up!");
                 break;
             case "AccuracyUp":
                 unit.accuracy += amount;
-                BattleManager.instance.combatLogManager.AddEventToCombatLog($"{unit.UnitName}'s Accuracy went up!");
+                battleManager.AddEventToCombatLog($"{unit.UnitName}'s Accuracy went up!");
                 break;
             case "DefenseUp":
                 unit.damageReduction += amount;
-                BattleManager.instance.combatLogManager.AddEventToCombatLog($"{unit.UnitName}'s Defense went up!");
+                battleManager.AddEventToCombatLog($"{unit.UnitName}'s Defense went up!");
                 break;
                 // Add more cases as needed
         }
@@ -42,15 +48,15 @@ public class BuffStatus : IStatusEffect
         {
             case "EvasionUp":
                 unit.evasion -= amount;
-                BattleManager.instance.combatLogManager.AddEventToCombatLog($"{unit.UnitName}'s Evasion is back to normal.");
+                battleManager.AddEventToCombatLog($"{unit.UnitName}'s Evasion is back to normal.");
                 break;
             case "AccuracyUp":
                 unit.accuracy -= amount;
-                BattleManager.instance.combatLogManager.AddEventToCombatLog($"{unit.UnitName}'s Evasion is back to normal.");
+                battleManager.AddEventToCombatLog($"{unit.UnitName}'s Evasion is back to normal.");
                 break;
             case "DefenseUp":
                 unit.damageReduction -= amount;
-                BattleManager.instance.combatLogManager.AddEventToCombatLog($"{unit.UnitName}'s Defense is back to normal.");
+                battleManager.AddEventToCombatLog($"{unit.UnitName}'s Defense is back to normal.");
                 break;
         }
     }

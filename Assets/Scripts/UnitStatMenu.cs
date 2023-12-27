@@ -52,9 +52,9 @@ public class UnitStatMenu : MonoBehaviour
     public void SelectSkillTargetUnit()
     {
         // Only allow player units to select a target unit
-        if (BattleManager.instance.ActiveUnit.IsPlayerUnit)
+        if (ServiceLocator.Instance.GetService<IBattleManager>().ActiveUnit.IsPlayerUnit)
         {
-            BattleManager.instance.PlayerSelectTargetUnit(_unit);
+            ServiceLocator.Instance.GetService<IBattleManager>().PlayerSelectTargetUnit(_unit);
         }
     }
 }

@@ -42,10 +42,8 @@ public class Skill
     }
 
     // Activate method applies all the skill's effects and status effects
-    public void Activate(UnitBase source, IEnumerable<UnitBase> targets, Skill skill)
+    public void Activate(UnitBase source, IEnumerable<UnitBase> targets, Skill skill, IBattleManager battleManager)
     {
-        Debug.Log($"Effects {Effects.Count} StatusEffects {StatusEffectMetadata.Count}");
-
         foreach (var target in targets)
         {
             foreach (var effect in Effects)
@@ -56,11 +54,9 @@ public class Skill
 
             foreach (var statusEffectMetadata in StatusEffectMetadata)
             {
-                // Apply each status effect to the target
-                Debug.Log($"applying {statusEffectMetadata.Type}  to {target.UnitName}");
                 // We need them instanced, as there might be duplicates
                 IStatusEffect statusEffect = CreateStatusEffect(statusEffectMetadata);
-                Debug.Log($"Created {statusEffect.Type}");
+                statusEffect.SetDependencies(battleManager);
                 target.ApplyStatusEffect(statusEffect);
             }
         }
@@ -76,9 +72,14 @@ public class Skill
         return skill.SkillTarget == SkillTargetType.Friendly;
     }
 
-        public static bool SkillTargetSelf(Skill skill)
+    public static bool SkillTargetSelf(Skill skill)
     {
         return skill.SkillTarget == SkillTargetType.Self;
+    }
+
+    public static bool IsSkillHealing(Skill skill)
+    {
+        return skill.Effects.Exists(e => e is HealingEffect);
     }
 
     private IStatusEffect CreateStatusEffect(StatusEffectMetadata metadata)
@@ -111,7 +112,8 @@ public enum DamageType
     None
 }
 
-public enum SkillTargetType{
+public enum SkillTargetType
+{
     Hostile,
     Friendly,
     Self
