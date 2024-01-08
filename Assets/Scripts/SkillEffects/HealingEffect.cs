@@ -8,7 +8,6 @@ public class HealingEffect : ISkillEffect
     public HealingEffect(int healingAmount)
     {
         this.healingAmount = healingAmount;
-        Debug.Log($"healing re");
     }
 
     public void ApplyEffect(UnitBase source, IEnumerable<UnitBase> targets, Skill skill)

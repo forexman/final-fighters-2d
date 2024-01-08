@@ -13,7 +13,7 @@ public class BattleSetup : MonoBehaviour
     public CombatLog combatLogPrefab;
     public AIManager aiManagerPrefab;
 
-    private void Start()
+    private void Awake()
     {
         // IBattleManager battleManager = Instantiate(battleManagerPrefab);
         // IBattleMenu battleMenu = Instantiate(battleMenuPrefab);
