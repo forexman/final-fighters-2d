@@ -6,7 +6,13 @@ public class DamageOverTimeEffect : ISkillEffect
 {
     private int power;
     private int duration;
+    private ICombatLogger combatLogger;
 
+    public void SetDependencies(ICombatLogger combatLogger)
+    {
+        this.combatLogger = combatLogger;
+    }
+    
     public DamageOverTimeEffect(int power, int duration)
     {
         this.power = power;

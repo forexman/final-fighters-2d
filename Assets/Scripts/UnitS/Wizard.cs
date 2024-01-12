@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class Wizard : UnitBase
 {
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         UnitName = "Wizard";
         UnitID = 3;
         MaxHP = 80;

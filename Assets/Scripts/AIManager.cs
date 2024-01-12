@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class AIManager : MonoBehaviour, IAIManager
 {
-    private IBattleManager battleManager;
+    private BattleManager battleManager;
 
-    public void Initialize(IBattleManager battleManager)
+    public void Initialize(BattleManager battleManager)
     {
         this.battleManager = battleManager;
     }
@@ -74,11 +74,11 @@ public class AIManager : MonoBehaviour, IAIManager
         {
             if (Skill.SkillTargetHostile(skill))
             {
-                targetUnits = battleManager.ActiveUnits.FindAll(member => !unit.IsUnitFriendly(member));
+                targetUnits = battleManager.GetActiveUnits().FindAll(member => !unit.IsUnitFriendly(member));
             }
             else if (Skill.SkillTargetFriendly(skill))
             {
-                targetUnits = battleManager.ActiveUnits.FindAll(member => unit.IsUnitFriendly(member));
+                targetUnits = battleManager.GetActiveUnits().FindAll(member => unit.IsUnitFriendly(member));
             }
             else
             {
@@ -93,7 +93,7 @@ public class AIManager : MonoBehaviour, IAIManager
     private UnitBase FindMostInjuredTeammate(UnitBase unit, Skill skill)
     {
         int healingAmount = (int)(skill.SkillPower);
-        List<UnitBase> teamMembers = battleManager.ActiveUnits.FindAll(member =>
+        List<UnitBase> teamMembers = battleManager.GetActiveUnits().FindAll(member =>
             unit.IsUnitFriendly(member) && healingAmount <= member.MaxHP - member.CurrentHP);
 
         if (teamMembers.Count == 0)
@@ -113,7 +113,7 @@ public class AIManager : MonoBehaviour, IAIManager
     // Retrieves all units from the opposing team
     private List<UnitBase> GetOpposingTeamUnits(UnitBase unit)
     {
-        return battleManager.ActiveUnits.FindAll(otherUnit => !unit.IsUnitFriendly(otherUnit));
+        return battleManager.GetActiveUnits().FindAll(otherUnit => !unit.IsUnitFriendly(otherUnit));
     }
 
     // Shuffles a list to randomize elements

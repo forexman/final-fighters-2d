@@ -4,9 +4,9 @@ public class DebuffStatus : IStatusEffect
     private string debuffType;
     private int amount;
     public int Duration { get; set; }
-    private IBattleManager battleManager;
+    private BattleManager battleManager;
 
-    public void SetDependencies(IBattleManager battleManager)
+    public void SetDependencies(BattleManager battleManager)
     {
         this.battleManager = battleManager;
     }

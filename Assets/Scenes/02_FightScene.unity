@@ -543,9 +543,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6424de3dbd97954285c024169a291e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isBattleActive: 0
-  activeUnits: []
-  activeUnit: {fileID: 0}
   playerPositions:
   - {fileID: 1361455833}
   - {fileID: 2146076870}
@@ -566,10 +563,7 @@ MonoBehaviour:
   - {fileID: 8511255493001864141, guid: 8a4ceb69757bffb469bdf3efde3c56a2, type: 3}
   - {fileID: 8765723464404096515, guid: 83ca63d448712e741bed9146fff20ff4, type: 3}
   - {fileID: 7629990475757240076, guid: 0f83a8775e4faba47b360debb3eebd67, type: 3}
-  currentTurn: 0
-  dmgText: {fileID: 6832428476641338111, guid: 246564e516919b44d88e13b94255d02c, type: 3}
-  targetUnits: []
-  actionsTakenThisTurn: 0
+  floatingDamageTextPrefab: {fileID: 7455747649338335845, guid: 246564e516919b44d88e13b94255d02c, type: 3}
 --- !u!4 &284468869
 Transform:
   m_ObjectHideFlags: 0
@@ -2074,7 +2068,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2084125391502363717, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 1078.6122
       objectReference: {fileID: 0}
     - target: {fileID: 2084125391502363717, guid: bbca5aa63e18b6f45a7156b79557b8c1, type: 3}
       propertyPath: m_AnchoredPosition.y

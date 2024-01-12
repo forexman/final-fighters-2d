@@ -42,7 +42,7 @@ public class Skill
     }
 
     // Activate method applies all the skill's effects and status effects
-    public void Activate(UnitBase source, IEnumerable<UnitBase> targets, Skill skill, IBattleManager battleManager)
+    public void Activate(UnitBase source, IEnumerable<UnitBase> targets, Skill skill, BattleManager battleManager)
     {
         foreach (var target in targets)
         {

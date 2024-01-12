@@ -7,7 +7,13 @@ public class BuffEffect : ISkillEffect
     private string buffType;
     private int amount;
     private int duration;
+    private ICombatLogger combatLogger;
 
+    public void SetDependencies(ICombatLogger combatLogger)
+    {
+        this.combatLogger = combatLogger;
+    }
+    
     public BuffEffect(string buffType, int amount, int duration)
     {
         this.buffType = buffType;

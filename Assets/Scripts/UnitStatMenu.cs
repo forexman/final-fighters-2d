@@ -9,9 +9,13 @@ public class UnitStatMenu : MonoBehaviour
 {
     // Serialized fields for UI text components
     [SerializeField] private TMP_Text unitNameText, unitHPText, unitMPText;
-
+    private BattleManager battleManager;
     // Reference to the unit this menu is associated with
     private UnitBase _unit;
+
+    public void Initialize(BattleManager battleManager){
+        this.battleManager = battleManager;
+    }
 
     /// <summary>
     /// Updates the UI text elements with the unit's information.
@@ -52,9 +56,9 @@ public class UnitStatMenu : MonoBehaviour
     public void SelectSkillTargetUnit()
     {
         // Only allow player units to select a target unit
-        if (ServiceLocator.Instance.GetService<IBattleManager>().ActiveUnit.IsPlayerUnit)
+        if (battleManager.GetActiveUnit().IsPlayerUnit)
         {
-            ServiceLocator.Instance.GetService<IBattleManager>().PlayerSelectTargetUnit(_unit);
+            battleManager.PlayerSelectTargetUnit(_unit);
         }
     }
 }

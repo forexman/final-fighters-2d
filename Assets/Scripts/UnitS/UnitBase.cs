@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -16,7 +17,6 @@ public class UnitBase : MonoBehaviour
     [SerializeField] private bool isPlaying;
     [SerializeField] private List<IStatusEffect> statusEffects = new List<IStatusEffect>();
     [SerializeField] public bool IsStunned;
-    [SerializeField] public bool HasHaste;
     [SerializeField] public int ActionsPerTurn = 1;
     [SerializeField] public UnitStatusUI unitStatusUI;
 
@@ -97,32 +97,64 @@ public class UnitBase : MonoBehaviour
         set { isPlaying = value; }
     }
 
-    public void Initialize(bool isPlayer)
+    private StatusEffectManager statusEffectManager;
+    private BattleManager battleManager;
+
+    protected virtual void Awake()
+    {
+        statusEffectManager = new StatusEffectManager(this);
+    }
+
+    public void Initialize(bool isPlayer, BattleManager battleManager)
     {
         IsPlayerUnit = isPlayer;
         UnitName = IsPlayerUnit ? UnitName : "Evil " + UnitName;
+        this.battleManager = battleManager;
+    }
+
+    void OnMouseDown()
+    {
+        if (battleManager != null)
+        {
+            if (battleManager.GetActiveUnit().IsPlayerUnit)
+            {
+                battleManager.PlayerSelectTargetUnit(this);
+            }
+
+        }
     }
 
     public virtual int MainAttributeValue
     {
-        get { return 0; } // Default implementation, to be overridden
+        get { return 0; }
     }
 
-    public int RollInitiative() => Random.Range(1, 21) + dexterity;
+    public int RollInitiative() => UnityEngine.Random.Range(1, 21) + dexterity;
 
-    public void TakeDamage(int dmg, DamageType dmgType)
+    public void TakeDamage(int amount, ISkillEffect effect)
     {
-        CurrentHP -= dmg;
-        if (CurrentHP <= 0)
-        {
-            CurrentHP = 0;
-            isMarkedForElimination = true;
-        }
+        CurrentHP = Mathf.Max(CurrentHP - amount, 0);
+        battleManager.DisplaySkillEffect(this, amount.ToString(), effect);
+        if (CurrentHP <= 0) HandleElimination();
     }
 
-    public void Heal(int amount)
+    public void TakeDamage(int amount, IStatusEffect effect)
+    {
+        CurrentHP = Mathf.Max(CurrentHP - amount, 0);
+        battleManager.DisplaySkillEffect(this, amount.ToString(), effect);
+        if (CurrentHP <= 0) HandleElimination();
+    }
+
+    private void HandleElimination()
+    {
+        CurrentHP = 0;
+        isMarkedForElimination = true;
+    }
+
+    public void Heal(int amount, ISkillEffect effect)
     {
         CurrentHP = Mathf.Min(CurrentHP + amount, MaxHP);
+        battleManager.DisplaySkillEffect(this, amount.ToString(), effect);
     }
 
     public void ReduceMP(int amount)
@@ -145,14 +177,14 @@ public class UnitBase : MonoBehaviour
         return currentMP >= skill.SkillCost;
     }
 
-    public void ApplyHaste(int duration)
+    public void ApplyHaste()
     {
-        // Implement logic to handle Haste effect
-        // This might involve flagging the unit for an extra turn or adjusting turn order
+        Debug.Log("Applying Haste LoL");
     }
 
     public void ApplyStatusEffect(IStatusEffect effect)
-    {
+    {        
+        statusEffectManager.Apply(effect);
         if (effect == null)
         {
             Debug.LogError("Tried to apply a null status effect.");
@@ -174,6 +206,7 @@ public class UnitBase : MonoBehaviour
 
     public void RemoveStatusEffect(IStatusEffect effect)
     {
+        statusEffectManager.Remove(effect);
         if (statusEffects.Contains(effect))
         {
             effect.RemoveStatus(this);

@@ -5,7 +5,13 @@ using UnityEngine;
 public class HasteEffect : ISkillEffect
 {
     private int duration;
+    private ICombatLogger combatLogger;
 
+    public void SetDependencies(ICombatLogger combatLogger)
+    {
+        this.combatLogger = combatLogger;
+    }
+    
     public HasteEffect(int duration)
     {
         this.duration = duration;
@@ -15,7 +21,7 @@ public class HasteEffect : ISkillEffect
     {
         foreach (var target in targets)
         {
-            target.ApplyHaste(duration);
+            target.ApplyHaste();
         }
     }
 }

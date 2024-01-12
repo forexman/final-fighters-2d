@@ -7,7 +7,13 @@ public class DebuffEffect : ISkillEffect
     private string debuffType;
     private int amount;
     private int duration;
+    private ICombatLogger combatLogger;
 
+    public void SetDependencies(ICombatLogger combatLogger)
+    {
+        this.combatLogger = combatLogger;
+    }
+    
     public DebuffEffect(string debuffType, int amount, int duration)
     {
         this.debuffType = debuffType;

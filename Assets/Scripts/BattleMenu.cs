@@ -14,9 +14,9 @@ public class BattleMenu : MonoBehaviour, IBattleMenu
     // Dictionary to keep track of unit stats panels
     private Dictionary<UnitBase, GameObject> unitStatsPanels = new Dictionary<UnitBase, GameObject>();
 
-    private IBattleManager battleManager;
+    private BattleManager battleManager;
 
-    public void Initialize(IBattleManager battleManager)
+    public void Initialize(BattleManager battleManager)
     {
         this.battleManager = battleManager;
     }
@@ -51,6 +51,7 @@ public class BattleMenu : MonoBehaviour, IBattleMenu
     {
         GameObject statsPanelPrefab = unit.IsPlayerUnit ? unitStatsPanel : enemyUnitStatsPanel;
         GameObject uStatsPanel = Instantiate(statsPanelPrefab);
+        uStatsPanel.GetComponent<UnitStatMenu>().Initialize(battleManager);
         uStatsPanel.GetComponent<UnitStatMenu>().UpdateText(unit);
 
         Transform parentPanel = unit.IsPlayerUnit ? playerPartyPanel.transform : enemyPartyPanel.transform;
@@ -154,7 +155,7 @@ public class BattleMenu : MonoBehaviour, IBattleMenu
     // Updates the MP display
     private void UpdateMPDisplay()
     {
-        UnitBase activeUnit = battleManager.ActiveUnit;
+        UnitBase activeUnit = battleManager.GetActiveUnit();
         unitCurrentMP.GetComponent<TextMeshProUGUI>().text = $"{activeUnit.CurrentMP}/{activeUnit.MaxMP}";
     }
 

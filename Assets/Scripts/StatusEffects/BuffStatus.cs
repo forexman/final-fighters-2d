@@ -8,9 +8,9 @@ public class BuffStatus : IStatusEffect
     private int amount;
     public int Duration { get; set; }
     public string Type => buffType;
-    private IBattleManager battleManager;
+    private BattleManager battleManager;
 
-    public void SetDependencies(IBattleManager battleManager)
+    public void SetDependencies(BattleManager battleManager)
     {
         this.battleManager = battleManager;
     }

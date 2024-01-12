@@ -7,7 +7,21 @@ public class SkillManager : MonoBehaviour
 {
     [SerializeField] private SkillMetadata[] skillMetadataList;
     [SerializeField] private List<Skill> skillList = new List<Skill>();
-    public static SkillManager Instance { get; private set; }
+    private SkillFactory skillFactory;
+    private static SkillManager instance;
+    public static SkillManager Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                // Handle the case where the instance doesn't exist
+                // This can be creating a new GameObject with SkillManager attached
+                // or handling it some other way
+            }
+            return instance;
+        }
+    }
 
     public SkillMetadata[] SkillMetadataList
     {
@@ -21,19 +35,38 @@ public class SkillManager : MonoBehaviour
         protected set { skillList = value; }
     }
 
-    void Awake()
+    // void Awake()
+    // {
+    //     if (Instance == null)
+    //     {
+    //         Instance = this;
+    //         DontDestroyOnLoad(gameObject);
+    //         LoadSkillsFromJSON();
+    //         InitializeSkills();
+    //     }
+    //     else
+    //     {
+    //         Destroy(gameObject);
+    //     }
+    // }
+
+    private void Awake()
     {
-        if (Instance == null)
+        if (instance != null && instance != this)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-            LoadSkillsFromJSON();
-            InitializeSkills();
+            Destroy(this.gameObject);
+            return;
         }
-        else
-        {
-            Destroy(gameObject);
-        }
+
+        instance = this;
+        DontDestroyOnLoad(this.gameObject);
+    }
+
+    public void Initialize(ICombatLogger combatLogger)
+    {
+        skillFactory = new SkillFactory(combatLogger);
+        LoadSkillsFromJSON();
+        InitializeSkills();
     }
 
     private void LoadSkillsFromJSON()
@@ -47,7 +80,7 @@ public class SkillManager : MonoBehaviour
     {
         foreach (var metadata in skillMetadataList)
         {
-            skillList.Add(SkillFactory.CreateSkill(metadata));
+            skillList.Add(skillFactory.CreateSkill(metadata));
         }
     }
 

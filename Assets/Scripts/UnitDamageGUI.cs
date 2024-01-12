@@ -18,7 +18,14 @@ public class UnitDamageGUI : MonoBehaviour
         transform.position += new Vector3(0f, moveSpeed * Time.deltaTime, 0f);
     }
 
-    public void SetValueGUI(int damageAmount, ISkillEffect effect)
+    public void SetValueGUI(string damageAmount)
+    {
+        damageText.text = "<color=#880808><b>" + damageAmount + "</b></color>";
+        float jitter = Random.Range(-textVibration, + textVibration);
+        transform.position += new Vector3(jitter, jitter, 0f);
+    }
+
+    public void SetValueGUI(string damageAmount, ISkillEffect effect)
     {
         bool isHealingEffect = effect is HealingEffect;
         if (isHealingEffect)
@@ -30,7 +37,23 @@ public class UnitDamageGUI : MonoBehaviour
             damageText.text = "<color=#880808><b>" + damageAmount + "</b></color>";
         }
 
-        float jitter = Random.Range(-textVibration, +textVibration);
+        float jitter = Random.Range(-textVibration, + textVibration);
+        transform.position += new Vector3(jitter, jitter, 0f);
+    }
+
+    public void SetValueGUI(string damageAmount, IStatusEffect effect)
+    {
+        bool isBuffStatus = effect is BuffStatus;
+        if (isBuffStatus)
+        {
+            damageText.text = "<color=#006400><b>" + damageAmount + "</b></color>";
+        }
+        else
+        {
+            damageText.text = "<color=#880808><b>" + damageAmount + "</b></color>";
+        }
+
+        float jitter = Random.Range(-textVibration, + textVibration);
         transform.position += new Vector3(jitter, jitter, 0f);
     }
 

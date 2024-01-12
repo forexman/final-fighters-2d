@@ -3,9 +3,9 @@ public class DamageOverTimeStatus : IStatusEffect
     private int damagePerTurn;
     public int Duration { get; set; }
     public string Type => "Poison";
-    private IBattleManager battleManager;
+    private BattleManager battleManager;
 
-    public void SetDependencies(IBattleManager battleManager)
+    public void SetDependencies(BattleManager battleManager)
     {
         this.battleManager = battleManager;
     }
@@ -36,7 +36,7 @@ public class DamageOverTimeStatus : IStatusEffect
         // Logic to apply damage each turn and decrement duration
         if (Duration > 0)
         {
-            unit.TakeDamage(damagePerTurn, DamageType.Physical);
+            unit.TakeDamage(damagePerTurn, this);
             battleManager.AddEventToCombatLog($"{unit.UnitName} takes {damagePerTurn} {DamageType.Physical} damage from poison.");
             Duration--;
         }

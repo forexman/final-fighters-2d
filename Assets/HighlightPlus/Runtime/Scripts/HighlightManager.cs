@@ -239,14 +239,6 @@ namespace HighlightPlus
                 // Toggles selection
                 if (InputProxy.GetMouseButtonDown(0))
                 {
-                    if (ServiceLocator.Instance.GetService<IBattleManager>()!=null)
-                    {
-                        if (ServiceLocator.Instance.GetService<IBattleManager>().ActiveUnit.IsPlayerUnit)
-                        {
-                            ServiceLocator.Instance.GetService<IBattleManager>().PlayerSelectTargetUnit(currentObject.transform.GetComponent<UnitBase>());
-                        }
-
-                    }
                     if (selectOnClick)
                     {
                         ToggleSelection(t, !toggle);

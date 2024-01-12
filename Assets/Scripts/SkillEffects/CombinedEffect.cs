@@ -5,7 +5,12 @@ using UnityEngine;
 public class CombinedEffect : ISkillEffect
 {
     private List<ISkillEffect> effects;
+    private ICombatLogger combatLogger;
 
+    public void SetDependencies(ICombatLogger combatLogger)
+    {
+        this.combatLogger = combatLogger;
+    }
     public CombinedEffect(params ISkillEffect[] effects)
     {
         this.effects = new List<ISkillEffect>(effects);

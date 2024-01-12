@@ -15,14 +15,19 @@ public class BattleSetup : MonoBehaviour
 
     private void Awake()
     {
-        // IBattleManager battleManager = Instantiate(battleManagerPrefab);
-        // IBattleMenu battleMenu = Instantiate(battleMenuPrefab);
-        battleManagerPrefab.Initialize(battleMenuPrefab, combatLogPrefab, aiManagerPrefab);
-        battleMenuPrefab.Initialize(battleManagerPrefab);
-        aiManagerPrefab.Initialize(battleManagerPrefab);
-        ServiceLocator.Instance.RegisterService<IBattleManager>(battleManagerPrefab);
-        ServiceLocator.Instance.RegisterService<IBattleMenu>(battleMenuPrefab);
-        ServiceLocator.Instance.RegisterService<ICombatLogger>(combatLogPrefab);
-        ServiceLocator.Instance.RegisterService<IAIManager>(aiManagerPrefab);
+        // var battleMenu = Instantiate(battleMenuPrefab);
+        // var combatLog = Instantiate(combatLogPrefab);
+        // var aiManager = Instantiate(aiManagerPrefab);
+        // var battleManager = Instantiate(battleManagerPrefab);
+
+        var battleMenu = battleMenuPrefab;
+        var combatLog = combatLogPrefab;
+        var aiManager = aiManagerPrefab;
+        var battleManager = battleManagerPrefab;
+        var skillManager = SkillManager.Instance;
+        skillManager.Initialize(combatLog);
+        battleManager.Initialize(battleMenu, combatLog, aiManager);
+        battleMenu.Initialize(battleManagerPrefab);
+        aiManager.Initialize(battleManagerPrefab);
     }
 }

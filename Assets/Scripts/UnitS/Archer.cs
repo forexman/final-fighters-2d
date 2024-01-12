@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class Archer : UnitBase
 {
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         UnitName = "Archer";
         UnitID = 1;
         MaxHP = 100;

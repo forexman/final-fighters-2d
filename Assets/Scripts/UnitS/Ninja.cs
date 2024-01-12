@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class Ninja : UnitBase
 {
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         UnitName = "Ninja";
         UnitID = 2;
         MaxHP = 120;

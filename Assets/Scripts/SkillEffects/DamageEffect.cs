@@ -8,6 +8,12 @@ public class DamageEffect : ISkillEffect
 {
     private int power;
     private DamageType damageType;
+    private ICombatLogger combatLogger;
+
+    public void SetDependencies(ICombatLogger combatLogger)
+    {
+        this.combatLogger = combatLogger;
+    }
 
     public DamageEffect(int power, DamageType type)
     {
@@ -19,7 +25,7 @@ public class DamageEffect : ISkillEffect
     {
         foreach (var target in targets)
         {
-            target.TakeDamage(CalculateDamage(source, target, skill), damageType);
+            target.TakeDamage(CalculateDamage(source, target, skill), this);
         }
     }
 
@@ -33,11 +39,11 @@ public class DamageEffect : ISkillEffect
         if (IsCriticalHit(attacker, skill))
         {
             finalDamage += (int)(finalDamage * (attacker.criticalDamageMultiplier + skill.CriticalDamageMultiplier) / 100);
-            ServiceLocator.Instance.GetService<ICombatLogger>().AddEventToCombatLog($"CRITICAL HIT! {attacker.UnitName} uses {skill.SkillName} and deals {Mathf.Max(0, finalDamage)} {damageType} damage to {defender.UnitName}.");
+            combatLogger.AddEventToCombatLog($"CRITICAL HIT! {attacker.UnitName} uses {skill.SkillName} and deals {Mathf.Max(0, finalDamage)} {damageType} damage to {defender.UnitName}.");
         }
         else
         {
-            ServiceLocator.Instance.GetService<ICombatLogger>().AddEventToCombatLog($"{attacker.UnitName} uses {skill.SkillName} and deals {Mathf.Max(0, finalDamage)} {damageType} damage to {defender.UnitName}.");
+            combatLogger.AddEventToCombatLog($"{attacker.UnitName} uses {skill.SkillName} and deals {Mathf.Max(0, finalDamage)} {damageType} damage to {defender.UnitName}.");
         }
 
         return Mathf.Max(0, finalDamage);

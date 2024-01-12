@@ -2,9 +2,16 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class SkillFactory
+public class SkillFactory
 {
-    public static Skill CreateSkill(SkillMetadata metadata)
+    private ICombatLogger combatLogger;
+
+    public SkillFactory(ICombatLogger combatLogger)
+    {
+        this.combatLogger = combatLogger;
+    }
+
+    public Skill CreateSkill(SkillMetadata metadata)
     {
         var effects = CreateEffectsBasedOnMetadata(metadata.Effects);
         var statusEffects = CreateStatusEffectsBasedOnMetadata(metadata.StatusEffects);
@@ -15,7 +22,7 @@ public static class SkillFactory
             metadata.CriticalChance, metadata.CriticalDamageMultiplier, metadata.SkillAccuracy
         );
     }
-    private static List<ISkillEffect> CreateEffectsBasedOnMetadata(List<EffectMetadata> effectMetadata)
+    private List<ISkillEffect> CreateEffectsBasedOnMetadata(List<EffectMetadata> effectMetadata)
     {
         var effects = new List<ISkillEffect>();
 
@@ -24,20 +31,23 @@ public static class SkillFactory
             switch (effect.Type)
             {
                 case "Damage":
-                    effects.Add(new DamageEffect(effect.Power, effect.DamageType));
+                    var damageEffect = new DamageEffect(effect.Power, effect.DamageType);
+                    damageEffect.SetDependencies(combatLogger);
+                    effects.Add(damageEffect);
                     break;
                 case "Healing":
-                    effects.Add(new HealingEffect(effect.Power));
+                    var healingEffect = new HealingEffect(effect.Power);
+                    healingEffect.SetDependencies(combatLogger);
+                    effects.Add(healingEffect);
                     break;
-                    // Handle other effect types
             }
         }
 
         return effects;
     }
 
-    private static List<StatusEffectMetadata> CreateStatusEffectsBasedOnMetadata(List<StatusEffectMetadata> statusEffectMetadata)
+    private List<StatusEffectMetadata> CreateStatusEffectsBasedOnMetadata(List<StatusEffectMetadata> statusEffectMetadata)
     {
-            return statusEffectMetadata;
+        return statusEffectMetadata;
     }
 }

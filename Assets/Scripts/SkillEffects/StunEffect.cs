@@ -5,7 +5,13 @@ using UnityEngine;
 public class StunEffect : ISkillEffect
 {
     private int duration;
+    private ICombatLogger combatLogger;
 
+    public void SetDependencies(ICombatLogger combatLogger)
+    {
+        this.combatLogger = combatLogger;
+    }
+    
     public StunEffect(int duration)
     {
         this.duration = duration;

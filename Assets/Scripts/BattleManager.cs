@@ -1,45 +1,36 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class BattleManager : MonoBehaviour, IBattleManager
+public class BattleManager : MonoBehaviour
 {
     // Serialized fields for customization in Unity Editor
-    [SerializeField] private bool isBattleActive;
-    [SerializeField] private List<UnitBase> activeUnits;
-    [SerializeField] private UnitBase activeUnit;
     [SerializeField] private Transform[] playerPositions;
     [SerializeField] private Transform[] enemyPositions;
     [SerializeField] private GameObject[] playerPrefabs, enemyPrefabs;
-    [SerializeField] private int currentTurn;
-    [SerializeField] private UnitDamageGUI dmgText;
-    [SerializeField] private Skill selectedSkill;
-    [SerializeField] private List<UnitBase> targetUnits;
-    [SerializeField] private int actionsTakenThisTurn;
-    private CombatLog combatLog;
+    [SerializeField] private GameObject floatingDamageTextPrefab;
     private IBattleMenu battleMenu;
     private IAIManager aiManager;
+    private ICombatLogger combatLogger;
+    private BattleService battleService;
 
-    // Getters and setters
-    public UnitBase ActiveUnit => activeUnit; //read-only, turn orders are only handled here
-    public Skill SelectedSkill
-    {
-        get => selectedSkill;
-        set => selectedSkill = value;
-    }
-    public List<UnitBase> ActiveUnits
-    {
-        get => activeUnits;
-        protected set => activeUnits = value;
-    }
-
-
-    public void Initialize(IBattleMenu battleMenu, CombatLog combatLog, IAIManager aiManager)
+    public void Initialize(IBattleMenu battleMenu, ICombatLogger combatLogger, IAIManager aiManager)
     {
         this.battleMenu = battleMenu;
-        this.combatLog = combatLog;
+        this.combatLogger = combatLogger;
         this.aiManager = aiManager;
+        battleService = new BattleService(battleMenu, combatLogger, aiManager, this);
+    }
+
+    public UnitBase GetActiveUnit()
+    {
+        return battleService.ActiveUnit;
+    }
+    public List<UnitBase> GetActiveUnits()
+    {
+        return battleService.ActiveUnits;
     }
 
     private void Start()
@@ -49,302 +40,125 @@ public class BattleManager : MonoBehaviour, IBattleManager
 
     public void StartBattle()
     {
-        isBattleActive = true;
-
-        activeUnits.Clear();
-        CreatePlayerUnits();
-        CreateEnemyUnits();
-
-        activeUnits.Sort((unitA, unitB) => unitB.RollInitiative().CompareTo(unitA.RollInitiative()));
-        currentTurn = -1;
-        combatLog.AddEventToCombatLog("Combat Starts!", false);
-        NextTurn();
+        battleService.StartBattle(playerPrefabs.Length, enemyPrefabs.Length);
     }
 
-    private void CreatePlayerUnits()
+    public UnitBase CreatePlayerUnit(int playerPrefabIndex)
     {
-        for (int i = 0; i < playerPrefabs.Length; i++)
-        {
-            GameObject playerInstance = Instantiate(playerPrefabs[i], playerPositions[i].position, Quaternion.identity);
-            UnitBase playerUnit = playerInstance.GetComponent<UnitBase>();
-            playerUnit.Initialize(true);
-            activeUnits.Add(playerUnit);
-            SetupUnitSpriteRenderer(playerInstance);
-            battleMenu.AddUnitStatsPanel(playerUnit);
-        }
+        GameObject playerInstance = Instantiate(playerPrefabs[playerPrefabIndex], playerPositions[playerPrefabIndex].position, Quaternion.identity);
+        UnitBase playerUnit = playerInstance.GetComponent<UnitBase>();
+        playerUnit.Initialize(true, this);
+        SetupUnitSpriteRenderer(playerInstance);
+        return playerUnit;
     }
 
-    private void SetupUnitSpriteRenderer(GameObject unitInstance)
+    public UnitBase CreateEnemyUnit(int enemyPrefabIndex)
+    {
+        GameObject enemyInstance = Instantiate(enemyPrefabs[enemyPrefabIndex], enemyPositions[enemyPrefabIndex].position, Quaternion.identity);
+        UnitBase enemyUnit = enemyInstance.GetComponent<UnitBase>();
+        enemyUnit.Initialize(false, this);
+        return enemyUnit;
+    }
+
+    public void SetupUnitSpriteRenderer(GameObject unitInstance)
     {
         SpriteRenderer spriteRenderer = unitInstance.GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null)
-        {
-            spriteRenderer.flipX = true;
-        }
-    }
-
-    private void CreateEnemyUnits()
-    {
-        for (int i = 0; i < enemyPrefabs.Length; i++)
-        {
-            GameObject enemyInstance = Instantiate(enemyPrefabs[i], enemyPositions[i].position, Quaternion.identity);
-            UnitBase enemyUnit = enemyInstance.GetComponent<UnitBase>();
-            enemyUnit.Initialize(false);
-            activeUnits.Add(enemyUnit);
-            battleMenu.AddUnitStatsPanel(enemyUnit);
-        }
+        if (spriteRenderer != null) spriteRenderer.flipX = true;
     }
 
     public void EndBattle()
     {
-        isBattleActive = false;
-        currentTurn = 0;
-        activeUnit = null;
-        targetUnits = new List<UnitBase>();
-        selectedSkill = null;
-        battleMenu.DisableCombatUI();
-        // Cleanup and reset logic for the end of the battle
+        Debug.Log("Called BattleManager");
+        battleService.EndBattle();
     }
 
     private void NextTurn()
     {
-        if (!isBattleActive) return;
-        EndUnitTurn();
-        HandleUnitElimination();
-        MoveToNextUnit();
+        Debug.Log("Called BattleManager");
+        battleService.NextTurn();
     }
 
-    private void EndUnitTurn()
+    public void EndUnitTurn()
     {
-        if (activeUnit != null)
-        {
-            activeUnit.IsPlaying = false;
-            // Update status effects for the unit that just completed its turn
-            activeUnit.UpdateStatusEffects();
-            battleMenu.UpdateUnitStatsPanelText(activeUnit);
-        }
+        Debug.Log("Called BattleManager");
+        battleService.EndUnitTurn();
     }
 
     private void HandleUnitElimination()
     {
-        for (int i = activeUnits.Count - 1; i >= 0; i--)
-        {
-            if (activeUnits[i].IsMarkedForElimination)
-            {
-                combatLog.AddEventToCombatLog(activeUnits[i].UnitName + " is unconscious!");
-                activeUnits.RemoveAt(i);
-            }
-        }
+        Debug.Log("Called BattleManager");
+        battleService.HandleUnitElimination();
     }
 
     private void MoveToNextUnit()
     {
-        if (!isBattleActive) return;
-
-        targetUnits = new List<UnitBase>();
-        selectedSkill = null;
-        actionsTakenThisTurn = 0;
-
-        currentTurn = (currentTurn + 1) % activeUnits.Count;
-        activeUnit = activeUnits[currentTurn];
-        activeUnit.IsPlaying = true;
-        combatLog.AddEventToCombatLog($"It is {activeUnit.UnitName}'s turn.");
-        battleMenu.SetInitiativePanel(activeUnits);
-
-        if (activeUnit.IsStunned)
-        {
-            combatLog.AddEventToCombatLog($"{activeUnit.UnitName} is stunned and loses its turn.");
-            NextTurn();
-        }
-        else
-        {
-            if (activeUnit.IsPlayerUnit)
-            {
-                battleMenu.PlayerTurn();
-                battleMenu.PopulateMagicPanel(SkillManager.Instance.GetClassSpecificSkills(activeUnit.UnitID));
-                StartCoroutine(PlayerMoveCoroutine());
-            }
-            else
-            {
-                battleMenu.EnemyTurn();
-                StartCoroutine(EnemyAIMoveCoroutine());
-            }
-        }
-
+        Debug.Log("Called BattleManager");
+        battleService.HandleUnitElimination();
     }
 
-    private IEnumerator EnemyAIMoveCoroutine()
+    public void PlayerMove()
     {
-        SkillSelection(aiManager.AIChooseSkill(activeUnit));
-        if (targetUnits.Count == 0) targetUnits = aiManager.AIChooseTargets(activeUnit, selectedSkill);
-        ExecuteAction(selectedSkill, targetUnits);
-        yield return new WaitForSeconds(0.3f);
+        StartCoroutine(PlayerMoveCoroutine());
     }
 
-    private IEnumerator PlayerMoveCoroutine()
+    public void EnemyAIMove(UnitBase activeUnit)
     {
-        while (selectedSkill == null || targetUnits.Count == 0)
+        StartCoroutine(EnemyAIMoveCoroutine(activeUnit));
+    }
+
+    public IEnumerator PlayerMoveCoroutine()
+    {
+        while (battleService.SelectedSkill == null || battleService.TargetUnits.Count == 0)
         {
             yield return null;
         }
-        ExecuteAction(selectedSkill, targetUnits);
+        battleService.ExecuteAction(battleService.SelectedSkill, battleService.TargetUnits);
         yield return new WaitForSeconds(.3f);
     }
 
-
+    public IEnumerator EnemyAIMoveCoroutine(UnitBase activeUnit)
+    {
+        battleService.SkillSelection(aiManager.AIChooseSkill(activeUnit));
+        battleService.ExecuteAction(battleService.SelectedSkill, aiManager.AIChooseTargets(activeUnit, battleService.SelectedSkill));
+        yield return new WaitForSeconds(0.3f);
+    }
 
     public void PlayerBasicAttack()
     {
-        selectedSkill = SkillManager.Instance.SkillList[0];
+        battleService.PlayerBasicAttack();
     }
 
     public void PlayerSelectTargetUnit(UnitBase unit)
     {
-        if (selectedSkill != null && activeUnits.Contains(unit))
-        {
-            if (Skill.SkillTargetHostile(selectedSkill))
-            {
-                if (!activeUnit.IsUnitFriendly(unit))
-                {
-                    targetUnits.Add(unit);
-                }
-            }
-            else if (Skill.SkillTargetFriendly(selectedSkill))
-            {
-                if (activeUnit.IsUnitFriendly(unit))
-                {
-                    targetUnits.Add(unit);
-                }
-            }
-            else
-            {
-                Debug.Log("Skill Target Selection Error");
-            }
-        }
+        battleService.PlayerSelectTargetUnit(unit);
     }
 
     public void SkillSelection(Skill skill)
     {
-        selectedSkill = skill;
-        if (selectedSkill != null)
-        {
-            if (Skill.SkillTargetSelf(selectedSkill)) targetUnits.Add(activeUnit);
-            if (selectedSkill.TargetCount > 1)
-            {
-                if (Skill.SkillTargetHostile(selectedSkill))
-                {
-                    targetUnits = activeUnits.FindAll(member => !activeUnit.IsUnitFriendly(member));
-                }
-                else if (Skill.SkillTargetFriendly(selectedSkill))
-                {
-                    targetUnits = activeUnits.FindAll(member => activeUnit.IsUnitFriendly(member));
-                }
-                else 
-                {
-                    Debug.Log("Skill Target Selection Error");
-                }
-            }
-        }
-    }
-
-    public void ExecuteAction(Skill skill, IEnumerable<UnitBase> targets)
-    {
-        ProcessSkillEffect(activeUnit, skill, targets);
-        UpdateBattleUI();
-        CheckBattleStatus();
-
-        actionsTakenThisTurn++;
-        if (actionsTakenThisTurn >= activeUnit.ActionsPerTurn)
-        {
-            NextTurn();
-        }
-        else
-        {
-            combatLog.AddEventToCombatLog(activeUnit.UnitName + " is hastened, and acts again!");
-            selectedSkill = null;
-            targetUnits = new List<UnitBase>();
-            // Continue with the current unit's turn
-            if (activeUnit.IsPlayerUnit)
-            {
-                StartCoroutine(PlayerMoveCoroutine());
-            }
-            else
-            {
-                StartCoroutine(EnemyAIMoveCoroutine());
-            }
-        }
-    }
-
-    private void ProcessSkillEffect(UnitBase sourceUnit, Skill skill, IEnumerable<UnitBase> targets)
-    {
-        foreach (var target in targets)
-        {
-            if (CheckSkillHit(sourceUnit, skill, target))
-            {
-                // Apply all the skill's effects and status effects to the target
-                skill.Activate(sourceUnit, new List<UnitBase> { target }, skill, this);
-            }
-            else
-            {
-                combatLog.AddEventToCombatLog($"{sourceUnit.UnitName} uses {skill.SkillName} and misses {target.UnitName}!");
-            }
-        }
-
-
-        // Reduce MP of the active unit if the skill requires it
-        sourceUnit.ReduceMP(skill.SkillCost);
-
-        // Display effects on the target unit (if applicable)
-        // DisplaySkillEffect(target, skill);
+        battleService.SkillSelection(skill);
     }
 
     public void AddEventToCombatLog(string message)
     {
-        combatLog.AddEventToCombatLog(message);
+        battleService.AddEventToCombatLog(message);
     }
 
-    private bool CheckSkillHit(UnitBase sourceUnit, Skill skill, UnitBase target)
+    public void DisplaySkillEffect(UnitBase target, string effectiveValue)
     {
-        if (Skill.SkillTargetFriendly(skill)) return true;
-        float hitChance = sourceUnit.accuracy + skill.SkillAccuracy - target.evasion;
-        return UnityEngine.Random.Range(0f, 100f) <= hitChance;
+        UnitDamageGUI unitDamageText = Instantiate(floatingDamageTextPrefab.GetComponent<UnitDamageGUI>(), new Vector3(target.transform.position.x, target.transform.position.y + 1.5f, target.transform.position.z), target.transform.rotation);
+        unitDamageText.SetValueGUI(effectiveValue);
     }
 
-
-
-    private void UpdateBattleUI()
+    public void DisplaySkillEffect(UnitBase target, string effectiveValue, ISkillEffect effect)
     {
-        // Update UI elements related to the active and target units
-        battleMenu.UpdateUnitStatsPanelText(activeUnit);
-        foreach (var target in targetUnits)
-        {
-            battleMenu.UpdateUnitStatsPanelText(target);
-        }
+        UnitDamageGUI unitDamageText = Instantiate(floatingDamageTextPrefab.GetComponent<UnitDamageGUI>(), new Vector3(target.transform.position.x, target.transform.position.y + 1.5f, target.transform.position.z), target.transform.rotation);
+        unitDamageText.SetValueGUI(effectiveValue, effect);
     }
 
-    private void CheckBattleStatus()
+    public void DisplaySkillEffect(UnitBase target, string effectiveValue, IStatusEffect effect)
     {
-        bool allEnemiesAreDead = true;
-        bool allPlayerAreDead = true;
-
-        for (int i = 0; i < activeUnits.Count; i++)
-        {
-            if (activeUnits[i].IsPlayerUnit) allPlayerAreDead = false;
-            else allEnemiesAreDead = false;
-        }
-
-        if (allEnemiesAreDead || allPlayerAreDead)
-        {
-            string resultMessage = allEnemiesAreDead ? "VICTORY" : "DEFEAT";
-            Debug.Log(resultMessage);
-            EndBattle();
-        }
+        UnitDamageGUI unitDamageText = Instantiate(floatingDamageTextPrefab.GetComponent<UnitDamageGUI>(), new Vector3(target.transform.position.x, target.transform.position.y + 1.5f, target.transform.position.z), target.transform.rotation);
+        unitDamageText.SetValueGUI(effectiveValue, effect);
     }
 
-    private void DisplaySkillEffect(UnitBase target, int effectiveValue, Skill skill)
-    {
-        UnitDamageGUI unitDamageText = Instantiate(dmgText, new Vector3(target.transform.position.x, target.transform.position.y + 1.5f, target.transform.position.z), target.transform.rotation);
-        unitDamageText.SetValueGUI(effectiveValue, skill.Effects[0]);
-        //Instantiate(skill.skillSFX, new Vector3(target.transform.position.x, target.transform.position.y + 0.6f, target.transform.position.z), target.transform.rotation);
-    }
 }

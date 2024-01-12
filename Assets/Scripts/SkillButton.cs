@@ -12,10 +12,10 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     [SerializeField] private TextMeshProUGUI skillNameText;
 
     private Skill skill;
-    private IBattleManager battleManager;
+    private BattleManager battleManager;
     private IBattleMenu battleMenu;
 
-    public void SetDependencies(IBattleManager battleManager, IBattleMenu battleMenu)
+    public void SetDependencies(BattleManager battleManager, IBattleMenu battleMenu)
     {
         this.battleManager = battleManager;
         this.battleMenu = battleMenu;        
@@ -40,7 +40,7 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     /// </summary>
     private void SelectSkillIfPossible()
     {
-        if (battleManager.ActiveUnit.CanUseSkill(skill))
+        if (battleManager.GetActiveUnit().CanUseSkill(skill))
         {
             battleManager.SkillSelection(skill);
         }
